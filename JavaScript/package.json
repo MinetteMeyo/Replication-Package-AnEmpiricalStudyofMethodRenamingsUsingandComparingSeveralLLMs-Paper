@@ -1,0 +1,31 @@
+{
+  "name": "javascript-method-parser",
+  "version": "1.0.0",
+  "description": "A JavaScript method parser using Acorn to extract methods from JavaScript codebases",
+  "main": "javascript_method_parser.js",
+  "scripts": {
+    "start": "node javascript_method_parser.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "javascript",
+    "parser",
+    "acorn",
+    "ast",
+    "methods",
+    "code-analysis"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "acorn": "^8.11.3",
+    "csv-parser": "^3.2.0",
+    "csv-writer": "^1.6.0",
+    "gpt-3-encoder": "^1.1.4",
+    "openai": "^5.8.3",
+    "tiktoken-node": "^0.0.7"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
