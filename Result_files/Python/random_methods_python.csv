@@ -1,0 +1,1218 @@
+Fully Qualified Name,File Path,Method Name,Method Body,Line Count
+modeling_instructblipvideo::forward,/Users/durjoy/Documents/Lab CSSE/Github_repos/python/transformers/src/transformers/models/instructblipvideo/modeling_instructblipvideo.py,forward,"    def forward(
+        self,
+        hidden_states: torch.Tensor,
+        head_mask: Optional[torch.Tensor] = None,
+        output_attentions: Optional[bool] = False,
+        **kwargs,
+    ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple[torch.Tensor]]]:
+        """"""Input shape: Batch x Time x Channel""""""
+
+        bsz, tgt_len, embed_dim = hidden_states.size()
+
+        mixed_qkv = self.qkv(hidden_states)
+
+        mixed_qkv = mixed_qkv.reshape(bsz, tgt_len, 3, self.num_heads, embed_dim // self.num_heads).permute(
+            2, 0, 3, 1, 4
+        )
+        query_states, key_states, value_states = mixed_qkv[0], mixed_qkv[1], mixed_qkv[2]
+
+        attention_interface: Callable = eager_attention_forward
+
+        if self.config._attn_implementation != ""eager"":
+            if self.config._attn_implementation == ""sdpa"" and output_attentions:
+                logger.warning_once(
+                    ""`torch.nn.functional.scaled_dot_product_attention` does not support `output_attentions=True`. Falling back to ""
+                    'eager attention. This warning can be removed using the argument `attn_implementation=""eager""` when loading the model.'
+                )
+            else:
+                attention_interface = ALL_ATTENTION_FUNCTIONS[self.config._attn_implementation]
+
+        attn_output, attn_weights = attention_interface(
+            self,
+            query_states,
+            key_states,
+            value_states,
+            attention_mask=None,
+            dropout=0.0 if not self.training else self.attention_dropout,
+            scaling=self.scale,
+            **kwargs,
+        )
+
+        attn_output = attn_output.reshape(bsz, tgt_len, -1).contiguous()
+        attn_output = self.projection(attn_output)
+
+        outputs = (attn_output, attn_weights) if output_attentions else (attn_output, None)
+        return outputs
+",36
+modeling_llava_next::unpad_image,/Users/durjoy/Documents/Lab CSSE/Github_repos/python/transformers/src/transformers/models/llava_next/modeling_llava_next.py,unpad_image,"def unpad_image(tensor, original_size):
+    """"""
+    Unpads a PyTorch tensor of a padded and resized image.
+
+    Args:
+        tensor (`torch.Tensor`):
+            The image tensor, assumed to be of shape (num_channels, height, width).
+        original_size (`tuple`):
+            The original size of the image (height, width).
+
+    Returns:
+        `torch.Tensor`: The unpadded image tensor.
+    """"""
+    if not isinstance(original_size, (list, tuple)):
+        if not isinstance(original_size, (torch.Tensor, np.ndarray)):
+            raise TypeError(
+                f""image_size invalid type: {type(original_size)} not valid, should be either list, tuple, np.ndarray or tensor""
+            )
+        original_size = original_size.tolist()
+    original_height, original_width = original_size
+    current_height, current_width = tensor.shape[1:]
+
+    original_aspect_ratio = original_width / original_height
+    current_aspect_ratio = current_width / current_height
+
+    if original_aspect_ratio > current_aspect_ratio:
+        scale_factor = current_width / original_width
+        new_height = int(round(original_height * scale_factor, 7))
+        padding = (current_height - new_height) // 2
+        unpadded_tensor = tensor[:, padding : current_height - padding, :]
+    else:
+        scale_factor = current_height / original_height
+        new_width = int(round(original_width * scale_factor, 7))
+        padding = (current_width - new_width) // 2
+        unpadded_tensor = tensor[:, :, padding : current_width - padding]
+
+    return unpadded_tensor
+",30
+image_processing_bridgetower_fast::pad,/Users/durjoy/Documents/Lab CSSE/Github_repos/python/transformers/src/transformers/models/bridgetower/image_processing_bridgetower_fast.py,pad,"    def pad(
+        self,
+        images: list[""torch.Tensor""],
+        constant_values: Union[float, Iterable[float]] = 0,
+        return_pixel_mask: bool = True,
+    ) -> tuple:
+        """"""
+        Pads a batch of images to the bottom and right of the image with zeros to the size of largest height and width
+        in the batch and optionally returns their corresponding pixel mask.
+
+        Args:
+            image (`torch.Tensor`):
+                Image to pad.
+            constant_values (`float` or `Iterable[float]`, *optional*):
+                The value to use for the padding if `mode` is `""constant""`.
+            return_pixel_mask (`bool`, *optional*, defaults to `True`):
+                Whether to return a pixel mask.
+            return_tensors (`str` or `TensorType`, *optional*):
+                The type of tensors to return. Can be one of:
+                    - Unset: Return a list of `np.ndarray`.
+                    - `TensorType.TENSORFLOW` or `'tf'`: Return a batch of type `tf.Tensor`.
+                    - `TensorType.PYTORCH` or `'pt'`: Return a batch of type `torch.Tensor`.
+                    - `TensorType.NUMPY` or `'np'`: Return a batch of type `np.ndarray`.
+                    - `TensorType.JAX` or `'jax'`: Return a batch of type `jax.numpy.ndarray`.
+        """"""
+        pad_size = get_max_height_width(images)
+
+        grouped_images, grouped_images_index = group_images_by_shape(images)
+        processed_images_grouped = {}
+        processed_masks_grouped = {}
+        for shape, stacked_images in grouped_images.items():
+            stacked_images = self._pad_image(
+                stacked_images,
+                pad_size,
+                constant_values=constant_values,
+            )
+            processed_images_grouped[shape] = stacked_images
+
+            if return_pixel_mask:
+                stacked_masks = make_pixel_mask(image=stacked_images, output_size=pad_size)
+                processed_masks_grouped[shape] = stacked_masks
+
+        processed_images = reorder_images(processed_images_grouped, grouped_images_index)
+
+        processed_masks = None
+        if return_pixel_mask:
+            processed_masks = reorder_images(processed_masks_grouped, grouped_images_index)
+
+        return processed_images, processed_masks
+",41
+modeling_tf_data2vec_vision::pseudo_1d_pool,/Users/durjoy/Documents/Lab CSSE/Github_repos/python/transformers/src/transformers/models/data2vec/modeling_tf_data2vec_vision.py,pseudo_1d_pool,"    def pseudo_1d_pool(self, inputs: tf.Tensor, h_pooling: bool):
+        # Figure out which axis we're pooling on
+        if h_pooling:
+            axis = self.h_axis
+            output_dim = self.output_dims[0]
+        else:
+            axis = self.w_axis
+            output_dim = self.output_dims[1]
+        input_dim = inputs.shape[axis]
+
+        # Figure out the potential pooling windows
+        # This is the key idea - the torch op always uses only two
+        # consecutive pooling window sizes, like 3 and 4. Therefore,
+        # if we pool with both possible sizes, we simply need to gather
+        # the 'correct' pool at each position to reimplement the torch op.
+        small_window = math.ceil(input_dim / output_dim)
+        big_window = small_window + 1
+        if h_pooling:
+            output_dim = self.output_dims[0]
+            small_window_shape = (small_window, 1)
+            big_window_shape = (big_window, 1)
+        else:
+            output_dim = self.output_dims[1]
+            small_window_shape = (1, small_window)
+            big_window_shape = (1, big_window)
+
+        # For resizes to 1, or integer resizes, we can take quick shortcuts
+        if output_dim == input_dim:
+            return inputs
+        elif output_dim == 1:
+            return tf.reduce_mean(inputs, axis=axis, keepdims=True)
+        elif input_dim % output_dim == 0:
+            return tf.nn.avg_pool2d(
+                inputs,
+                ksize=small_window_shape,
+                strides=small_window_shape,
+                padding=""VALID"",
+                data_format=self.input_ordering,
+            )
+        # When upscaling by an integer factor we can also take a quick shortcut
+        elif output_dim > input_dim and output_dim % input_dim == 0:
+            return tf.repeat(inputs, repeats=output_dim // input_dim, axis=axis)
+
+        # For non-integer resizes, we pool with both possible window sizes and concatenate them
+        if output_dim < input_dim:
+            small_pool = tf.nn.avg_pool2d(
+                inputs, ksize=small_window_shape, strides=1, padding=""VALID"", data_format=self.input_ordering
+            )
+            big_pool = tf.nn.avg_pool2d(
+                inputs, ksize=big_window_shape, strides=1, padding=""VALID"", data_format=self.input_ordering
+            )
+            both_pool = tf.concat([small_pool, big_pool], axis=axis)
+        else:
+            # When we're actually upscaling instead, then we build the pools a bit differently
+            small_pool = inputs
+            big_pool = tf.nn.avg_pool2d(
+                inputs, ksize=big_window_shape, strides=1, padding=""VALID"", data_format=self.input_ordering
+            )
+            both_pool = tf.concat([small_pool, big_pool], axis=axis)
+
+        # We compute vectors of the start and end positions for each pooling window
+        # Each (start, end) pair here corresponds to a single output position
+        window_starts = tf.math.floor((tf.range(output_dim, dtype=tf.float32) * input_dim) / output_dim)
+        window_starts = tf.cast(window_starts, tf.int64)
+        window_ends = tf.math.ceil((tf.range(1, output_dim + 1, dtype=tf.float32) * input_dim) / output_dim)
+        window_ends = tf.cast(window_ends, tf.int64)
+
+        # pool_selector is a boolean array of shape (output_dim,) where 1 indicates that output position
+        # has a big receptive field and 0 indicates that that output position has a small receptive field
+        pool_selector = tf.cast(window_ends - window_starts - small_window, tf.bool)
+
+        # Since we concatenated the small and big pools, we need to do a bit of
+        # pointer arithmetic to get the indices of the big pools
+        small_indices = window_starts
+        big_indices = window_starts + small_pool.shape[axis]
+
+        # Finally, we use the pool_selector to generate a list of indices, one per output position
+        gather_indices = tf.where(pool_selector, big_indices, small_indices)
+
+        # Gathering from those indices yields the final, correct pooling
+        return tf.gather(both_pool, gather_indices, axis=axis)
+",55
+modeling_tf_groupvit::call,/Users/durjoy/Documents/Lab CSSE/Github_repos/python/transformers/src/transformers/models/groupvit/modeling_tf_groupvit.py,call,"    def call(
+        self,
+        pixel_values: TFModelInputType | None = None,
+        output_attentions: Optional[bool] = None,
+        output_hidden_states: Optional[bool] = None,
+        return_dict: Optional[bool] = None,
+        training: bool = False,
+    ) -> Union[TFBaseModelOutputWithPooling, Tuple[tf.Tensor]]:
+        r""""""
+        Returns:
+
+        Examples:
+
+        ```python
+        >>> from PIL import Image
+        >>> import requests
+        >>> from transformers import AutoProcessor, TFGroupViTVisionModel
+
+        >>> processor = AutoProcessor.from_pretrained(""nvidia/groupvit-gcc-yfcc"")
+        >>> model = TFGroupViTVisionModel.from_pretrained(""nvidia/groupvit-gcc-yfcc"")
+
+        >>> url = ""http://images.cocodataset.org/val2017/000000039769.jpg""
+        >>> image = Image.open(requests.get(url, stream=True).raw)
+
+        >>> inputs = processor(images=image, return_tensors=""tf"")
+
+        >>> outputs = model(**inputs)
+        >>> last_hidden_state = outputs.last_hidden_state
+        >>> pooled_output = outputs.pooler_output  # pooled CLS states
+        ```""""""
+
+        outputs = self.groupvit(
+            pixel_values=pixel_values,
+            output_attentions=output_attentions,
+            output_hidden_states=output_hidden_states,
+            return_dict=return_dict,
+            training=training,
+        )
+
+        return outputs
+",32
+modeling_reformer::_hash_vectors,/Users/durjoy/Documents/Lab CSSE/Github_repos/python/transformers/src/transformers/models/reformer/modeling_reformer.py,_hash_vectors,"    def _hash_vectors(self, vectors, num_hashes, attention_mask, increase_num_buckets=False):
+        batch_size = vectors.shape[0]
+
+        # See https://arxiv.org/pdf/1509.02897.pdf
+        # We sample a different random rotation for each round of hashing to
+        # decrease the probability of hash misses.
+        if isinstance(self.num_buckets, int):
+            assert self.num_buckets % 2 == 0, (
+                f""There should be an even number of buckets, but `self.num_buckets`: {self.num_buckets}""
+            )
+            rotation_size = self.num_buckets
+            num_buckets = self.num_buckets
+        else:
+            # Factorize the hash if self.num_buckets is a list or tuple
+            rotation_size, num_buckets = 0, 1
+            for bucket_factor in self.num_buckets:
+                assert bucket_factor % 2 == 0, (
+                    f""The number of buckets should be even, but `num_bucket`: {bucket_factor}""
+                )
+                rotation_size = rotation_size + bucket_factor
+                num_buckets = num_buckets * bucket_factor
+
+        # remove gradient
+        vectors = vectors.detach()
+
+        if self.hash_seed is not None:
+            # for determinism
+            torch.manual_seed(self.hash_seed)
+
+        rotations_shape = (self.num_attention_heads, vectors.shape[-1], num_hashes, rotation_size // 2)
+        # create a random self.attention_head_size x num_hashes x num_buckets/2
+        random_rotations = torch.randn(rotations_shape, device=vectors.device, dtype=vectors.dtype)
+        # Output dim: Batch_Size x Num_Attn_Heads x Num_Hashes x Seq_Len x Num_Buckets/2
+        rotated_vectors = torch.einsum(""bmtd,mdhr->bmhtr"", vectors, random_rotations)
+
+        if isinstance(self.num_buckets, int) or len(self.num_buckets) == 1:
+            rotated_vectors = torch.cat([rotated_vectors, -rotated_vectors], dim=-1)
+            buckets = torch.argmax(rotated_vectors, dim=-1)
+        else:
+            # Get the buckets for them and combine.
+            buckets, cur_sum, cur_product = None, 0, 1
+            for bucket_factor in self.num_buckets:
+                rotated_vectors_factor = rotated_vectors[..., cur_sum : cur_sum + (bucket_factor // 2)]
+                cur_sum = cur_sum + bucket_factor // 2
+                rotated_vectors_factor = torch.cat([rotated_vectors_factor, -rotated_vectors_factor], dim=-1)
+                if buckets is None:
+                    buckets = torch.argmax(rotated_vectors_factor, dim=-1)
+                else:
+                    buckets = buckets + (cur_product * torch.argmax(rotated_vectors_factor, dim=-1))
+
+                cur_product = cur_product * bucket_factor
+
+        if attention_mask is not None and (attention_mask.sum().item() < batch_size * attention_mask.shape[-1]):
+            # add an extra bucket for padding tokens only
+            num_buckets = num_buckets + 1
+            # assign padding tokens extra bucket
+            buckets_mask = attention_mask.to(torch.bool)[:, None, None, :].expand(buckets.shape)
+            buckets = torch.where(
+                buckets_mask, buckets, torch.tensor(num_buckets - 1, dtype=torch.long, device=buckets.device)
+            )
+        elif increase_num_buckets:
+            num_buckets = num_buckets + 1
+
+        # buckets is now (Batch_size x Num_Attn_Heads x Num_Hashes x Seq_Len).
+        # Next we add offsets so that bucket numbers from different hashing rounds don't overlap.
+        offsets = torch.arange(num_hashes, device=vectors.device)
+        offsets = (offsets * num_buckets).view((1, 1, -1, 1))
+
+        # expand to batch size and num attention heads
+        offsets = offsets.expand((batch_size, self.num_attention_heads) + offsets.shape[-2:])
+        offset_buckets = (buckets + offsets).flatten(start_dim=2, end_dim=3)
+
+        return offset_buckets
+",49
+modeling_pop2piano::_update_causal_mask,/Users/durjoy/Documents/Lab CSSE/Github_repos/python/transformers/src/transformers/models/pop2piano/modeling_pop2piano.py,_update_causal_mask,"    def _update_causal_mask(
+        self,
+        attention_mask: Union[torch.Tensor, ""BlockMask""],
+        input_tensor: torch.Tensor,
+        cache_position: torch.Tensor,
+        past_key_values: Cache,
+        output_attentions: bool = False,
+    ):
+        if self.config._attn_implementation == ""flash_attention_2"":
+            if attention_mask is not None and (attention_mask == 0.0).any():
+                return attention_mask
+            return None
+        if self.config._attn_implementation == ""flex_attention"":
+            if isinstance(attention_mask, torch.Tensor):
+                attention_mask = make_flex_block_causal_mask(attention_mask)
+            return attention_mask
+
+        # For SDPA, when possible, we will rely on its `is_causal` argument instead of its `attn_mask` argument, in
+        # order to dispatch on Flash Attention 2. This feature is not compatible with static cache, as SDPA will fail
+        # to infer the attention mask.
+        past_seen_tokens = past_key_values.get_seq_length() if past_key_values is not None else 0
+        using_compilable_cache = past_key_values.is_compileable if past_key_values is not None else False
+
+        # When output attentions is True, sdpa implementation's forward method calls the eager implementation's forward
+        if self.config._attn_implementation == ""sdpa"" and not using_compilable_cache and not output_attentions:
+            if AttentionMaskConverter._ignore_causal_mask_sdpa(
+                attention_mask,
+                inputs_embeds=input_tensor,
+                past_key_values_length=past_seen_tokens,
+                is_training=self.training,
+            ):
+                return None
+
+        dtype = input_tensor.dtype
+        sequence_length = input_tensor.shape[1]
+        if using_compilable_cache:
+            target_length = past_key_values.get_max_cache_shape()
+        else:
+            target_length = (
+                attention_mask.shape[-1]
+                if isinstance(attention_mask, torch.Tensor)
+                else past_seen_tokens + sequence_length + 1
+            )
+
+        # In case the provided `attention` mask is 2D, we generate a causal mask here (4D).
+        causal_mask = self._prepare_4d_causal_attention_mask_with_cache_position(
+            attention_mask,
+            sequence_length=sequence_length,
+            target_length=target_length,
+            dtype=dtype,
+            cache_position=cache_position,
+            batch_size=input_tensor.shape[0],
+        )
+
+        if (
+            self.config._attn_implementation == ""sdpa""
+            and attention_mask is not None
+            and attention_mask.device.type in [""cuda"", ""xpu"", ""npu""]
+            and not output_attentions
+        ):
+            # Attend to all tokens in fully masked rows in the causal_mask, for example the relevant first rows when
+            # using left padding. This is required by F.scaled_dot_product_attention memory-efficient attention path.
+            # Details: https://github.com/pytorch/pytorch/issues/110213
+            min_dtype = torch.finfo(dtype).min
+            causal_mask = AttentionMaskConverter._unmask_unattended(causal_mask, min_dtype)
+
+        return causal_mask
+",53
+modeling_d_fine::forward,/Users/durjoy/Documents/Lab CSSE/Github_repos/python/transformers/src/transformers/models/d_fine/modeling_d_fine.py,forward,"    def forward(
+        self,
+        hidden_states: torch.Tensor,
+        attention_mask: Optional[torch.Tensor] = None,
+        reference_points=None,
+        encoder_hidden_states=None,
+        spatial_shapes=None,
+        spatial_shapes_list=None,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        batch_size, num_queries, _ = hidden_states.shape
+        batch_size, sequence_length, _ = encoder_hidden_states.shape
+
+        if not is_torchdynamo_compiling() and (spatial_shapes[:, 0] * spatial_shapes[:, 1]).sum() != sequence_length:
+            raise ValueError(
+                ""Make sure to align the spatial shapes with the sequence length of the encoder hidden states""
+            )
+
+        # Reshape for multi-head attention
+        value = encoder_hidden_states.reshape(batch_size, sequence_length, self.n_heads, self.d_model // self.n_heads)
+        if attention_mask is not None:
+            value = value.masked_fill(~attention_mask[..., None], float(0))
+
+        sampling_offsets: torch.Tensor = self.sampling_offsets(hidden_states)
+        sampling_offsets = sampling_offsets.reshape(
+            batch_size, num_queries, self.n_heads, sum(self.num_points_list), 2
+        )
+
+        attention_weights = self.attention_weights(hidden_states).reshape(
+            batch_size, num_queries, self.n_heads, sum(self.num_points_list)
+        )
+        attention_weights = F.softmax(attention_weights, dim=-1)
+
+        if reference_points.shape[-1] == 2:
+            offset_normalizer = torch.tensor(spatial_shapes)
+            offset_normalizer = offset_normalizer.flip([1]).reshape(1, 1, 1, self.n_levels, 1, 2)
+            sampling_locations = (
+                reference_points.reshape(batch_size, sequence_length, 1, self.n_levels, 1, 2)
+                + sampling_offsets / offset_normalizer
+            )
+        elif reference_points.shape[-1] == 4:
+            # reference_points [8, 480, None, 1,  4]
+            # sampling_offsets [8, 480, 8,    12, 2]
+            num_points_scale = self.num_points_scale.to(dtype=hidden_states.dtype).unsqueeze(-1)
+            offset = sampling_offsets * num_points_scale * reference_points[:, :, None, :, 2:] * self.offset_scale
+            sampling_locations = reference_points[:, :, None, :, :2] + offset
+        else:
+            raise ValueError(
+                ""Last dim of reference_points must be 2 or 4, but get {} instead."".format(reference_points.shape[-1])
+            )
+
+        output = self.ms_deformable_attn_core(
+            value,
+            spatial_shapes_list,
+            sampling_locations,
+            attention_weights,
+            self.num_points_list,
+            self.decoder_method,
+        )
+
+        return output, attention_weights
+",50
+modeling_altclip::forward,/Users/durjoy/Documents/Lab CSSE/Github_repos/python/transformers/src/transformers/models/altclip/modeling_altclip.py,forward,"    def forward(
+        self, input_ids=None, token_type_ids=None, position_ids=None, inputs_embeds=None, past_key_values_length=0
+    ):
+        if position_ids is None:
+            if input_ids is not None:
+                # Create the position ids from the input token ids. Any padded tokens remain padded.
+                position_ids = create_position_ids_from_input_ids(input_ids, self.padding_idx, past_key_values_length)
+            else:
+                position_ids = self.create_position_ids_from_inputs_embeds(inputs_embeds)
+
+        if input_ids is not None:
+            input_shape = input_ids.size()
+        else:
+            input_shape = inputs_embeds.size()[:-1]
+
+        seq_length = input_shape[1]
+
+        # Setting the token_type_ids to the registered buffer in constructor where it is all zeros, which usually occurs
+        # when its auto-generated, registered buffer helps users when tracing the model without passing token_type_ids, solves
+        # issue #5664
+        if token_type_ids is None:
+            if hasattr(self, ""token_type_ids""):
+                buffered_token_type_ids = self.token_type_ids[:, :seq_length]
+                buffered_token_type_ids_expanded = buffered_token_type_ids.expand(input_shape[0], seq_length)
+                token_type_ids = buffered_token_type_ids_expanded
+            else:
+                token_type_ids = torch.zeros(input_shape, dtype=torch.long, device=self.position_ids.device)
+
+        if inputs_embeds is None:
+            inputs_embeds = self.word_embeddings(input_ids)
+        token_type_embeddings = self.token_type_embeddings(token_type_ids)
+
+        embeddings = inputs_embeds + token_type_embeddings
+        if self.position_embedding_type == ""absolute"":
+            position_embeddings = self.position_embeddings(position_ids)
+            embeddings += position_embeddings
+        embeddings = self.LayerNorm(embeddings)
+        embeddings = self.dropout(embeddings)
+        return embeddings
+",30
+modeling_encoder_decoder::from_pretrained,/Users/durjoy/Documents/Lab CSSE/Github_repos/python/transformers/src/transformers/models/encoder_decoder/modeling_encoder_decoder.py,from_pretrained,"    def from_pretrained(cls, pretrained_model_name_or_path, *model_args, **kwargs):
+        r""""""
+        Example:
+
+        ```python
+        >>> from transformers import EncoderDecoderModel
+
+        >>> model = EncoderDecoderModel.from_pretrained(""patrickvonplaten/bert2bert-cnn_dailymail-fp16"")
+        ```""""""
+
+        from_tf = kwargs.pop(""from_tf"", False)
+        if from_tf:
+            from transformers import TFEncoderDecoderModel
+
+            # a workaround to load from tensorflow checkpoint
+            # Using `_tf_model` won't work, because the weight names in the encoder/decoder of `_tf_model` get
+            # extended before saving those components. For example, The name of `_tf_model.encoder.vit` is
+            # `[top model name]/encoder/vit`, but the name of `tf_model.encoder.vit` is `[top model name]/vit`. The
+            # [top model name] is handled (stripped) by the conversion method, and the former case gets extra `encoder`,
+            # which should not occur when we want to save the components alone.
+            # There was a (very) ugly potential fix, which wasn't integrated to `transformers`: see
+            #   https://github.com/huggingface/transformers/pull/13222/commits/dbb3c9de76eee235791d2064094654637c99f36d#r697304245
+            #   (the change in `src/transformers/modeling_tf_utils.py`)
+            _tf_model = TFEncoderDecoderModel.from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)
+            config = _tf_model.config
+
+            # Using `tf_model` instead
+            encoder = _tf_model.encoder.__class__(_tf_model.config.encoder)
+            decoder = _tf_model.decoder.__class__(_tf_model.config.decoder)
+            # Make sure models are built
+            encoder(encoder.dummy_inputs)
+            decoder(decoder.dummy_inputs)
+
+            # Get the variable correspondence between `_tf_model` and `encoder` and `decoder`
+            encoder_variables = {}
+            for v in encoder.trainable_variables + encoder.non_trainable_variables:
+                encoder_variables[""/"".join(v.name.split(""/"")[1:])] = v
+            decoder_variables = {}
+            for v in decoder.trainable_variables + decoder.non_trainable_variables:
+                decoder_variables[""/"".join(v.name.split(""/"")[1:])] = v
+
+            _encoder_variables = {}
+            for v in _tf_model.encoder.trainable_variables + _tf_model.encoder.non_trainable_variables:
+                _encoder_variables[""/"".join(v.name.split(""/"")[2:])] = v
+            _decoder_variables = {}
+            for v in _tf_model.decoder.trainable_variables + _tf_model.decoder.non_trainable_variables:
+                _decoder_variables[""/"".join(v.name.split(""/"")[2:])] = v
+
+            # assign weight values to `encoder` and `decoder` from `_tf_model`
+            for name, v in encoder_variables.items():
+                v.assign(_encoder_variables[name])
+            for name, v in decoder_variables.items():
+                v.assign(_decoder_variables[name])
+
+            tf_model = TFEncoderDecoderModel(encoder=encoder, decoder=decoder)
+
+            # Deal with `enc_to_dec_proj`
+            if hasattr(_tf_model, ""enc_to_dec_proj""):
+                tf_model(tf_model.dummy_inputs)
+                tf_model.enc_to_dec_proj.kernel.assign(_tf_model.enc_to_dec_proj.kernel)
+                tf_model.enc_to_dec_proj.bias.assign(_tf_model.enc_to_dec_proj.bias)
+
+            with tempfile.TemporaryDirectory() as tmpdirname:
+                encoder_dir = os.path.join(tmpdirname, ""encoder"")
+                decoder_dir = os.path.join(tmpdirname, ""decoder"")
+                tf_model.encoder.save_pretrained(encoder_dir)
+                tf_model.decoder.save_pretrained(decoder_dir)
+
+                if hasattr(tf_model, ""enc_to_dec_proj""):
+                    enc_to_dec_proj_weight = torch.transpose(
+                        torch.from_numpy(tf_model.enc_to_dec_proj.kernel.numpy()), 1, 0
+                    )
+                    enc_to_dec_proj_bias = torch.from_numpy(tf_model.enc_to_dec_proj.bias.numpy())
+
+                del _tf_model
+                del tf_model
+                gc.collect()
+
+                model = EncoderDecoderModel.from_encoder_decoder_pretrained(
+                    encoder_dir, decoder_dir, encoder_from_tf=True, decoder_from_tf=True
+                )
+                # This is only for copying some specific attributes of this particular model.
+                model.config = config
+
+                if hasattr(model, ""enc_to_dec_proj""):
+                    model.enc_to_dec_proj.weight.data = enc_to_dec_proj_weight.contiguous()
+                    model.enc_to_dec_proj.bias.data = enc_to_dec_proj_bias.contiguous()
+
+                return model
+
+        return super().from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)
+",59
+modeling_tf_flaubert::call,/Users/durjoy/Documents/Lab CSSE/Github_repos/python/transformers/src/transformers/models/flaubert/modeling_tf_flaubert.py,call,"    def call(
+        self,
+        input_ids: TFModelInputType | None = None,
+        attention_mask: np.ndarray | tf.Tensor | None = None,
+        langs: np.ndarray | tf.Tensor | None = None,
+        token_type_ids: np.ndarray | tf.Tensor | None = None,
+        position_ids: np.ndarray | tf.Tensor | None = None,
+        lengths: np.ndarray | tf.Tensor | None = None,
+        cache: Optional[Dict[str, tf.Tensor]] = None,
+        head_mask: np.ndarray | tf.Tensor | None = None,
+        inputs_embeds: np.ndarray | tf.Tensor | None = None,
+        output_attentions: Optional[bool] = None,
+        output_hidden_states: Optional[bool] = None,
+        return_dict: Optional[bool] = None,
+        labels: np.ndarray | tf.Tensor | None = None,
+        training: bool = False,
+    ) -> Union[TFMultipleChoiceModelOutput, Tuple[tf.Tensor]]:
+        if input_ids is not None:
+            num_choices = shape_list(input_ids)[1]
+            seq_length = shape_list(input_ids)[2]
+        else:
+            num_choices = shape_list(inputs_embeds)[1]
+            seq_length = shape_list(inputs_embeds)[2]
+
+        flat_input_ids = tf.reshape(input_ids, (-1, seq_length)) if input_ids is not None else None
+        flat_attention_mask = tf.reshape(attention_mask, (-1, seq_length)) if attention_mask is not None else None
+        flat_token_type_ids = tf.reshape(token_type_ids, (-1, seq_length)) if token_type_ids is not None else None
+        flat_position_ids = tf.reshape(position_ids, (-1, seq_length)) if position_ids is not None else None
+        flat_langs = tf.reshape(langs, (-1, seq_length)) if langs is not None else None
+        flat_inputs_embeds = (
+            tf.reshape(inputs_embeds, (-1, seq_length, shape_list(inputs_embeds)[3]))
+            if inputs_embeds is not None
+            else None
+        )
+
+        if lengths is not None:
+            logger.warning(
+                ""The `lengths` parameter cannot be used with the Flaubert multiple choice models. Please use the ""
+                ""attention mask instead."",
+            )
+            lengths = None
+
+        transformer_outputs = self.transformer(
+            flat_input_ids,
+            flat_attention_mask,
+            flat_langs,
+            flat_token_type_ids,
+            flat_position_ids,
+            lengths,
+            cache,
+            head_mask,
+            flat_inputs_embeds,
+            output_attentions,
+            output_hidden_states,
+            return_dict=return_dict,
+            training=training,
+        )
+        output = transformer_outputs[0]
+        logits = self.sequence_summary(output)
+        logits = self.logits_proj(logits)
+        reshaped_logits = tf.reshape(logits, (-1, num_choices))
+
+        loss = None if labels is None else self.hf_compute_loss(labels, reshaped_logits)
+
+        if not return_dict:
+            output = (reshaped_logits,) + transformer_outputs[1:]
+            return ((loss,) + output) if loss is not None else output
+
+        return TFMultipleChoiceModelOutput(
+            loss=loss,
+            logits=reshaped_logits,
+            hidden_states=transformer_outputs.hidden_states,
+            attentions=transformer_outputs.attentions,
+        )
+",68
+modular_informer::_update_causal_mask,/Users/durjoy/Documents/Lab CSSE/Github_repos/python/transformers/src/transformers/models/informer/modular_informer.py,_update_causal_mask,"    def _update_causal_mask(
+        self,
+        attention_mask: Union[torch.Tensor, None],
+        input_shape: torch.Size,
+        inputs_embeds: torch.Tensor,
+        past_key_values_length: int,
+    ):
+        if self.config._attn_implementation == ""flash_attention_2"":
+            # 2d mask is passed through the layers
+            attention_mask = attention_mask if (attention_mask is not None and 0 in attention_mask) else None
+        elif self.config._attn_implementation == ""sdpa"":
+            # output_attentions=True & cross_attn_head_mask can not be supported when using SDPA, and we fall back on
+            # the manual implementation that requires a 4D causal mask in all cases.
+            attention_mask = _prepare_4d_causal_attention_mask_for_sdpa(
+                attention_mask,
+                input_shape,
+                inputs_embeds,
+                past_key_values_length,
+            )
+        elif self.config._attn_implementation == ""flex_attention"":
+            if isinstance(attention_mask, torch.Tensor):
+                attention_mask = make_flex_block_causal_mask(attention_mask)
+            # Other attention flavors support in-built causal (when `mask is None`)
+            # while we need to create our specific block mask regardless
+            elif attention_mask is None:
+                attention_mask = make_flex_block_causal_mask(
+                    torch.ones(
+                        size=(input_shape),
+                        device=inputs_embeds.device,
+                    )
+                )
+        else:
+            # 4d mask is passed through the layers
+            attention_mask = _prepare_4d_causal_attention_mask(
+                attention_mask, input_shape, inputs_embeds, past_key_values_length
+            )
+
+        return attention_mask
+",31
+modeling_wav2vec2_conformer::_init_weights,/Users/durjoy/Documents/Lab CSSE/Github_repos/python/transformers/src/transformers/models/wav2vec2_conformer/modeling_wav2vec2_conformer.py,_init_weights,"    def _init_weights(self, module):
+        """"""Initialize the weights""""""
+        # Wav2Vec2ForPreTraining last 2 linear layers need standard Linear init.
+        if isinstance(module, Wav2Vec2ConformerForPreTraining):
+            module.project_hid.reset_parameters()
+            module.project_q.reset_parameters()
+            module.project_hid._is_hf_initialized = True
+            module.project_q._is_hf_initialized = True
+        # gumbel softmax requires special init
+        elif isinstance(module, Wav2Vec2ConformerGumbelVectorQuantizer):
+            module.weight_proj.weight.data.normal_(mean=0.0, std=1)
+            module.weight_proj.bias.data.zero_()
+            nn.init.uniform_(module.codevectors)
+        elif isinstance(module, Wav2Vec2ConformerSelfAttention):
+            if hasattr(module, ""pos_bias_u""):
+                nn.init.xavier_uniform_(module.pos_bias_u)
+            if hasattr(module, ""pos_bias_v""):
+                nn.init.xavier_uniform_(module.pos_bias_v)
+        elif isinstance(module, Wav2Vec2ConformerPositionalConvEmbedding):
+            nn.init.normal_(
+                module.conv.weight,
+                mean=0,
+                std=2 * math.sqrt(1 / (module.conv.kernel_size[0] * module.conv.in_channels)),
+            )
+            nn.init.constant_(module.conv.bias, 0)
+        elif isinstance(module, Wav2Vec2ConformerFeatureProjection):
+            k = math.sqrt(1 / module.projection.in_features)
+            nn.init.uniform_(module.projection.weight, a=-k, b=k)
+            nn.init.uniform_(module.projection.bias, a=-k, b=k)
+        elif isinstance(module, nn.Linear):
+            module.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
+
+            if module.bias is not None:
+                module.bias.data.zero_()
+        elif isinstance(module, (nn.LayerNorm, nn.GroupNorm)):
+            module.bias.data.zero_()
+            module.weight.data.fill_(1.0)
+        elif isinstance(module, nn.Conv1d):
+            nn.init.kaiming_normal_(module.weight)
+
+            if module.bias is not None:
+                k = math.sqrt(module.groups / (module.in_channels * module.kernel_size[0]))
+                nn.init.uniform_(module.bias, a=-k, b=k)
+",38
+modular_wav2vec2_conformer::forward,/Users/durjoy/Documents/Lab CSSE/Github_repos/python/transformers/src/transformers/models/wav2vec2_conformer/modular_wav2vec2_conformer.py,forward,"    def forward(
+        self,
+        hidden_states,
+        attention_mask=None,
+        output_attentions=False,
+        output_hidden_states=False,
+        return_dict=True,
+    ):
+        all_hidden_states = () if output_hidden_states else None
+        all_self_attentions = () if output_attentions else None
+
+        if attention_mask is not None:
+            # make sure padded tokens output 0
+            expand_attention_mask = attention_mask.unsqueeze(-1).repeat(1, 1, hidden_states.shape[2])
+            hidden_states[~expand_attention_mask] = 0.0
+
+            # extend attention_mask
+            attention_mask = 1.0 - attention_mask[:, None, None, :].to(dtype=hidden_states.dtype)
+            attention_mask = attention_mask * torch.finfo(hidden_states.dtype).min
+            attention_mask = attention_mask.expand(
+                attention_mask.shape[0], 1, attention_mask.shape[-1], attention_mask.shape[-1]
+            )
+
+        hidden_states = self.dropout(hidden_states)
+
+        if self.embed_positions is not None:
+            relative_position_embeddings = self.embed_positions(hidden_states)
+        else:
+            relative_position_embeddings = None
+
+        synced_gpus = is_deepspeed_zero3_enabled() or is_fsdp_managed_module(self)
+
+        for i, layer in enumerate(self.layers):
+            if output_hidden_states:
+                all_hidden_states = all_hidden_states + (hidden_states,)
+
+            # add LayerDrop (see https://arxiv.org/abs/1909.11556 for description)
+            dropout_probability = torch.rand([])
+
+            skip_the_layer = True if self.training and (dropout_probability < self.config.layerdrop) else False
+            if not skip_the_layer or synced_gpus:
+                # under fsdp or deepspeed zero3 all gpus must run in sync
+                if self.gradient_checkpointing and self.training:
+                    layer_outputs = self._gradient_checkpointing_func(
+                        layer.__call__,
+                        hidden_states,
+                        attention_mask,
+                        relative_position_embeddings,
+                        output_attentions,
+                    )
+                else:
+                    layer_outputs = layer(
+                        hidden_states,
+                        attention_mask=attention_mask,
+                        relative_position_embeddings=relative_position_embeddings,
+                        output_attentions=output_attentions,
+                    )
+                hidden_states = layer_outputs[0]
+
+            if skip_the_layer:
+                layer_outputs = (None, None)
+
+            if output_attentions:
+                all_self_attentions = all_self_attentions + (layer_outputs[1],)
+
+        hidden_states = self.layer_norm(hidden_states)
+        if output_hidden_states:
+            all_hidden_states = all_hidden_states + (hidden_states,)
+
+        if not return_dict:
+            return tuple(v for v in [hidden_states, all_hidden_states, all_self_attentions] if v is not None)
+        return BaseModelOutput(
+            last_hidden_state=hidden_states,
+            hidden_states=all_hidden_states,
+            attentions=all_self_attentions,
+        )
+",60
+audio_utils::chroma_filter_bank,/Users/durjoy/Documents/Lab CSSE/Github_repos/python/transformers/src/transformers/audio_utils.py,chroma_filter_bank,"def chroma_filter_bank(
+    num_frequency_bins: int,
+    num_chroma: int,
+    sampling_rate: int,
+    tuning: float = 0.0,
+    power: Optional[float] = 2.0,
+    weighting_parameters: Optional[tuple[float, float]] = (5.0, 2.0),
+    start_at_c_chroma: Optional[bool] = True,
+):
+    """"""
+    Creates a chroma filter bank, i.e a linear transformation to project spectrogram bins onto chroma bins.
+
+    Adapted from *librosa*.
+
+    Args:
+        num_frequency_bins (`int`):
+            Number of frequencies used to compute the spectrogram (should be the same as in `stft`).
+        num_chroma (`int`):
+            Number of chroma bins (i.e pitch classes).
+        sampling_rate (`float`):
+            Sample rate of the audio waveform.
+        tuning (`float`):
+            Tuning deviation from A440 in fractions of a chroma bin.
+        power (`float`, *optional*, defaults to 2.0):
+            If 12.0, normalizes each column with their L2 norm. If 1.0, normalizes each column with their L1 norm.
+        weighting_parameters (`Tuple[float, float]`, *optional*, defaults to `(5., 2.)`):
+            If specified, apply a Gaussian weighting parameterized by the first element of the tuple being the center and
+            the second element being the Gaussian half-width.
+        start_at_c_chroma (`float`, *optional*, defaults to `True`):
+            If True, the filter bank will start at the 'C' pitch class. Otherwise, it will start at 'A'.
+    Returns:
+        `np.ndarray` of shape `(num_frequency_bins, num_chroma)`
+    """"""
+    # Get the FFT bins, not counting the DC component
+    frequencies = np.linspace(0, sampling_rate, num_frequency_bins, endpoint=False)[1:]
+
+    freq_bins = num_chroma * hertz_to_octave(frequencies, tuning=tuning, bins_per_octave=num_chroma)
+
+    # make up a value for the 0 Hz bin = 1.5 octaves below bin 1
+    # (so chroma is 50% rotated from bin 1, and bin width is broad)
+    freq_bins = np.concatenate(([freq_bins[0] - 1.5 * num_chroma], freq_bins))
+
+    bins_width = np.concatenate((np.maximum(freq_bins[1:] - freq_bins[:-1], 1.0), [1]))
+
+    chroma_filters = np.subtract.outer(freq_bins, np.arange(0, num_chroma, dtype=""d"")).T
+
+    num_chroma2 = np.round(float(num_chroma) / 2)
+
+    # Project into range -num_chroma/2 .. num_chroma/2
+    # add on fixed offset of 10*num_chroma to ensure all values passed to
+    # rem are positive
+    chroma_filters = np.remainder(chroma_filters + num_chroma2 + 10 * num_chroma, num_chroma) - num_chroma2
+
+    # Gaussian bumps - 2*D to make them narrower
+    chroma_filters = np.exp(-0.5 * (2 * chroma_filters / np.tile(bins_width, (num_chroma, 1))) ** 2)
+
+    # normalize each column
+    if power is not None:
+        chroma_filters = chroma_filters / np.sum(chroma_filters**power, axis=0, keepdims=True) ** (1.0 / power)
+
+    # Maybe apply scaling for fft bins
+    if weighting_parameters is not None:
+        center, half_width = weighting_parameters
+        chroma_filters *= np.tile(
+            np.exp(-0.5 * (((freq_bins / num_chroma - center) / half_width) ** 2)),
+            (num_chroma, 1),
+        )
+
+    if start_at_c_chroma:
+        chroma_filters = np.roll(chroma_filters, -3 * (num_chroma // 12), axis=0)
+
+    # remove aliasing columns, copy to ensure row-contiguity
+    return np.ascontiguousarray(chroma_filters[:, : int(1 + num_frequency_bins / 2)])
+",48
+modeling_dab_detr::gen_sine_position_embeddings,/Users/durjoy/Documents/Lab CSSE/Github_repos/python/transformers/src/transformers/models/dab_detr/modeling_dab_detr.py,gen_sine_position_embeddings,"def gen_sine_position_embeddings(pos_tensor, hidden_size=256):
+    """"""
+    This function computes position embeddings using sine and cosine functions from the input positional tensor,
+    which has a shape of (batch_size, num_queries, 4).
+    The last dimension of `pos_tensor` represents the following coordinates:
+    - 0: x-coord
+    - 1: y-coord
+    - 2: width
+    - 3: height
+
+    The output shape is (batch_size, num_queries, 512), where final dim (hidden_size*2 = 512) is the total embedding dimension
+    achieved by concatenating the sine and cosine values for each coordinate.
+    """"""
+    scale = 2 * math.pi
+    dim = hidden_size // 2
+    dim_t = torch.arange(dim, dtype=torch.float32, device=pos_tensor.device)
+    dim_t = 10000 ** (2 * torch.div(dim_t, 2, rounding_mode=""floor"") / dim)
+    x_embed = pos_tensor[:, :, 0] * scale
+    y_embed = pos_tensor[:, :, 1] * scale
+    pos_x = x_embed[:, :, None] / dim_t
+    pos_y = y_embed[:, :, None] / dim_t
+    pos_x = torch.stack((pos_x[:, :, 0::2].sin(), pos_x[:, :, 1::2].cos()), dim=3).flatten(2)
+    pos_y = torch.stack((pos_y[:, :, 0::2].sin(), pos_y[:, :, 1::2].cos()), dim=3).flatten(2)
+    if pos_tensor.size(-1) == 4:
+        w_embed = pos_tensor[:, :, 2] * scale
+        pos_w = w_embed[:, :, None] / dim_t
+        pos_w = torch.stack((pos_w[:, :, 0::2].sin(), pos_w[:, :, 1::2].cos()), dim=3).flatten(2)
+
+        h_embed = pos_tensor[:, :, 3] * scale
+        pos_h = h_embed[:, :, None] / dim_t
+        pos_h = torch.stack((pos_h[:, :, 0::2].sin(), pos_h[:, :, 1::2].cos()), dim=3).flatten(2)
+
+        pos = torch.cat((pos_y, pos_x, pos_w, pos_h), dim=2)
+    else:
+        raise ValueError(""Unknown pos_tensor shape(-1):{}"".format(pos_tensor.size(-1)))
+    return pos
+",31
+modeling_hubert::forward,/Users/durjoy/Documents/Lab CSSE/Github_repos/python/transformers/src/transformers/models/hubert/modeling_hubert.py,forward,"    def forward(
+        self,
+        input_values: Optional[torch.Tensor],
+        attention_mask: Optional[torch.Tensor] = None,
+        output_attentions: Optional[bool] = None,
+        output_hidden_states: Optional[bool] = None,
+        return_dict: Optional[bool] = None,
+        labels: Optional[torch.Tensor] = None,
+    ) -> Union[Tuple, CausalLMOutput]:
+        r""""""
+        labels (`torch.LongTensor` of shape `(batch_size, target_length)`, *optional*):
+            Labels for connectionist temporal classification. Note that `target_length` has to be smaller or equal to
+            the sequence length of the output logits. Indices are selected in `[-100, 0, ..., config.vocab_size - 1]`.
+            All labels set to `-100` are ignored (masked), the loss is only computed for labels in `[0, ...,
+            config.vocab_size - 1]`.
+        """"""
+        return_dict = return_dict if return_dict is not None else self.config.use_return_dict
+
+        if labels is not None and labels.max() >= self.config.vocab_size:
+            raise ValueError(f""Label values must be <= vocab_size: {self.config.vocab_size}"")
+
+        outputs = self.hubert(
+            input_values,
+            attention_mask=attention_mask,
+            output_attentions=output_attentions,
+            output_hidden_states=output_hidden_states,
+            return_dict=return_dict,
+        )
+
+        hidden_states = outputs[0]
+        hidden_states = self.dropout(hidden_states)
+
+        logits = self.lm_head(hidden_states)
+
+        loss = None
+        if labels is not None:
+            # retrieve loss input_lengths from attention_mask
+            attention_mask = (
+                attention_mask if attention_mask is not None else torch.ones_like(input_values, dtype=torch.long)
+            )
+            input_lengths = self._get_feat_extract_output_lengths(attention_mask.sum(-1)).to(torch.long)
+
+            # assuming that padded tokens are filled with -100
+            # when not being attended to
+            labels_mask = labels >= 0
+            target_lengths = labels_mask.sum(-1)
+            flattened_targets = labels.masked_select(labels_mask)
+
+            # ctc_loss doesn't support fp16
+            log_probs = nn.functional.log_softmax(logits, dim=-1, dtype=torch.float32).transpose(0, 1)
+
+            with torch.backends.cudnn.flags(enabled=False):
+                loss = nn.functional.ctc_loss(
+                    log_probs,
+                    flattened_targets,
+                    input_lengths,
+                    target_lengths,
+                    blank=self.config.pad_token_id,
+                    reduction=self.config.ctc_loss_reduction,
+                    zero_infinity=self.config.ctc_zero_infinity,
+                )
+
+        if not return_dict:
+            output = (logits,) + outputs[_HIDDEN_STATES_START_POSITION:]
+            return ((loss,) + output) if loss is not None else output
+
+        return CausalLMOutput(
+            loss=loss, logits=logits, hidden_states=outputs.hidden_states, attentions=outputs.attentions
+        )
+",54
+modeling_sam_hq::forward,/Users/durjoy/Documents/Lab CSSE/Github_repos/python/transformers/src/transformers/models/sam_hq/modeling_sam_hq.py,forward,"    def forward(
+        self,
+        queries: Tensor,
+        keys: Tensor,
+        query_point_embedding: Tensor,
+        key_point_embedding: Tensor,
+        attention_similarity: Tensor,
+        output_attentions: bool = False,
+    ):
+        # Self attention block
+        if self.skip_first_layer_pe:
+            queries = self.self_attn(query=queries, key=queries, value=queries)
+        else:
+            query = queries + query_point_embedding
+            attn_out = self.self_attn(query=query, key=query, value=queries)
+            queries = queries + attn_out
+        queries = self.layer_norm1(queries)
+
+        # Cross attention block, tokens attending to image embedding
+        query = queries + query_point_embedding
+        key = keys + key_point_embedding
+
+        attn_out = self.cross_attn_token_to_image(
+            query=query, key=key, value=keys, attention_similarity=attention_similarity
+        )
+        queries = queries + attn_out
+
+        queries = self.layer_norm2(queries)
+
+        # MLP block
+        mlp_out = self.mlp(queries)
+        queries = queries + mlp_out
+        queries = self.layer_norm3(queries)
+
+        # Cross attention block, image embedding attending to tokens
+        query = queries + query_point_embedding
+        key = keys + key_point_embedding
+
+        attn_out = self.cross_attn_image_to_token(query=key, key=query, value=queries)
+        keys = keys + attn_out
+
+        keys = self.layer_norm4(keys)
+
+        outputs = (queries, keys)
+
+        if output_attentions:
+            outputs = outputs + (attn_out,)
+        else:
+            outputs = outputs + (None,)
+
+        return outputs
+",37
+modeling_pegasus_x::forward,/Users/durjoy/Documents/Lab CSSE/Github_repos/python/transformers/src/transformers/models/pegasus_x/modeling_pegasus_x.py,forward,"    def forward(
+        self,
+        hidden_states: torch.Tensor,
+        global_hidden_states: torch.Tensor,
+        attention_mask: torch.Tensor,
+        output_attentions: bool = False,
+    ) -> torch.Tensor:
+        """"""
+        Args:
+            hidden_states (`torch.FloatTensor`): input to the layer of shape *(seq_len, batch, embed_dim)*
+            global_hidden_states (`torch.FloatTensor`): global token hidden states
+                *(seq_len, num_global_tokens, embed_dim)*
+            attention_mask (`torch.FloatTensor`): attention mask of size
+                *(batch, 1, tgt_len, src_len)* where padding elements are indicated by very large negative values.
+            output_attentions (`bool`, *optional*):
+                Whether or not to return the attentions tensors of all attention layers. See `attentions` under
+                returned tensors for more detail.
+        """"""
+        residual = hidden_states
+        global_residual = global_hidden_states
+
+        hidden_states = self.self_attn_layer_norm(hidden_states)
+        global_hidden_states = self.global_self_attn_layer_norm(global_hidden_states)
+
+        if self.stagger_blocks_this_layer:
+            # Pad the blocks to simulate staggering
+            hidden_states, attention_mask = self.pad_local_tokens(
+                hidden_states=hidden_states, attention_mask=attention_mask, block_size=self.block_size
+            )
+
+        hidden_states, global_hidden_states, attn_weights = self.self_attn(
+            token_hidden_states=hidden_states,
+            global_hidden_states=global_hidden_states,
+            attention_mask=attention_mask,
+            output_attentions=output_attentions,
+        )
+
+        if self.stagger_blocks_this_layer:
+            # Undo the padding
+            hidden_states = self.unpad_local_tokens(padded_hidden_states=hidden_states, block_size=self.block_size)
+
+        hidden_states = nn.functional.dropout(hidden_states, p=self.dropout, training=self.training)
+        hidden_states = residual + hidden_states
+
+        global_hidden_states = nn.functional.dropout(global_hidden_states, p=self.dropout, training=self.training)
+        global_hidden_states = global_residual + global_hidden_states
+
+        residual = hidden_states
+        hidden_states = self.final_layer_norm(hidden_states)
+        hidden_states = self.activation_fn(self.fc1(hidden_states))
+        hidden_states = nn.functional.dropout(hidden_states, p=self.activation_dropout, training=self.training)
+        hidden_states = self.fc2(hidden_states)
+        hidden_states = nn.functional.dropout(hidden_states, p=self.dropout, training=self.training)
+        hidden_states = residual + hidden_states
+
+        global_residual = global_hidden_states
+        global_hidden_states = self.final_layer_norm(global_hidden_states)
+        global_hidden_states = self.activation_fn(self.fc1(global_hidden_states))
+        global_hidden_states = nn.functional.dropout(
+            global_hidden_states, p=self.activation_dropout, training=self.training
+        )
+        global_hidden_states = self.fc2(global_hidden_states)
+        global_hidden_states = nn.functional.dropout(global_hidden_states, p=self.dropout, training=self.training)
+        global_hidden_states = global_residual + global_hidden_states
+        outputs = (hidden_states, global_hidden_states)
+
+        if output_attentions:
+            outputs += (attn_weights,)
+
+        return outputs
+",56
+modeling_mimi::_update_causal_mask,/Users/durjoy/Documents/Lab CSSE/Github_repos/python/transformers/src/transformers/models/mimi/modeling_mimi.py,_update_causal_mask,"    def _update_causal_mask(
+        self,
+        attention_mask: Union[torch.Tensor, ""BlockMask""],
+        input_tensor: torch.Tensor,
+        cache_position: torch.Tensor,
+        past_key_values: Cache,
+        output_attentions: bool = False,
+    ):
+        if self.config._attn_implementation == ""flash_attention_2"":
+            if attention_mask is not None and past_key_values is not None:
+                is_padding_right = attention_mask[:, -1].sum().item() != input_tensor.size()[0]
+                if is_padding_right:
+                    raise ValueError(
+                        ""You are attempting to perform batched generation with padding_side='right'""
+                        "" this may lead to unexpected behaviour for Flash Attention version of Mimi. Make sure to ""
+                        "" call `tokenizer.padding_side  = 'left'` before tokenizing the input. ""
+                    )
+            if attention_mask is not None and 0.0 in attention_mask:
+                return attention_mask
+            return None
+        if self.config._attn_implementation == ""flex_attention"":
+            if isinstance(attention_mask, torch.Tensor):
+                attention_mask = make_flex_block_causal_mask(attention_mask)
+            return attention_mask
+
+        # For SDPA, when possible, we will rely on its `is_causal` argument instead of its `attn_mask` argument, in
+        # order to dispatch on Flash Attention 2. This feature is not compatible with static cache, as SDPA will fail
+        # to infer the attention mask.
+        past_seen_tokens = past_key_values.get_seq_length() if past_key_values is not None else 0
+        using_static_cache = isinstance(past_key_values, StaticCache)
+        using_sliding_window_cache = isinstance(past_key_values, SlidingWindowCache)
+
+        # When output attentions is True, sdpa implementation's forward method calls the eager implementation's forward
+        if (
+            self.config._attn_implementation == ""sdpa""
+            and not (using_static_cache or using_sliding_window_cache)
+            and not output_attentions
+        ):
+            if AttentionMaskConverter._ignore_causal_mask_sdpa(
+                attention_mask,
+                inputs_embeds=input_tensor,
+                past_key_values_length=past_seen_tokens,
+                sliding_window=self.config.sliding_window,
+                is_training=self.training,
+            ):
+                return None
+
+        dtype = input_tensor.dtype
+        min_dtype = torch.finfo(dtype).min
+        sequence_length = input_tensor.shape[1]
+        # SlidingWindowCache or StaticCache
+        if using_sliding_window_cache or using_static_cache:
+            target_length = past_key_values.get_max_cache_shape()
+        # DynamicCache or no cache
+        else:
+            target_length = (
+                attention_mask.shape[-1]
+                if isinstance(attention_mask, torch.Tensor)
+                else past_seen_tokens + sequence_length + 1
+            )
+
+        # In case the provided `attention` mask is 2D, we generate a causal mask here (4D).
+        causal_mask = self._prepare_4d_causal_attention_mask_with_cache_position(
+            attention_mask,
+            sequence_length=sequence_length,
+            target_length=target_length,
+            dtype=dtype,
+            cache_position=cache_position,
+            batch_size=input_tensor.shape[0],
+            config=self.config,
+            past_key_values=past_key_values,
+        )
+
+        if (
+            self.config._attn_implementation == ""sdpa""
+            and attention_mask is not None
+            and attention_mask.device.type in [""cuda"", ""xpu"", ""npu""]
+            and not output_attentions
+        ):
+            # Attend to all tokens in fully masked rows in the causal_mask, for example the relevant first rows when
+            # using left padding. This is required by F.scaled_dot_product_attention memory-efficient attention path.
+            # Details: https://github.com/pytorch/pytorch/issues/110213
+            causal_mask = AttentionMaskConverter._unmask_unattended(causal_mask, min_dtype)
+
+        return causal_mask
+",69

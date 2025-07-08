@@ -1,0 +1,450 @@
+Fully Qualified Name,File Path,Method Name,Method Body,Line Count
+"/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/elasticsearch/ElasticsearchRestClientAutoConfigurationTests.java::elasticsearchConnectionDetails","/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/elasticsearch/ElasticsearchRestClientAutoConfigurationTests.java","elasticsearchConnectionDetails","@Bean
+		ElasticsearchConnectionDetails elasticsearchConnectionDetails() {
+			return new ElasticsearchConnectionDetails() {
+
+				@Override
+				public List<Node> getNodes() {
+					return List
+						.of(new Node(""elastic.example.com"", 9200, Protocol.HTTP, ""node-user-1"", ""node-password-1""));
+				}
+
+				@Override
+				public String getUsername() {
+					return ""user-1"";
+				}
+
+				@Override
+				public String getPassword() {
+					return ""password-1"";
+				}
+
+				@Override
+				public String getPathPrefix() {
+					return ""/some-path"";
+				}
+
+			};
+		}","22"
+"/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot-actuator/src/test/java/org/springframework/boot/actuate/health/CompositeHealthContributorReactiveAdapterTests.java::iteratorWhenDelegateContainsHealthIndicatorAdaptsDelegate","/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot-actuator/src/test/java/org/springframework/boot/actuate/health/CompositeHealthContributorReactiveAdapterTests.java","iteratorWhenDelegateContainsHealthIndicatorAdaptsDelegate","@Test
+	void iteratorWhenDelegateContainsHealthIndicatorAdaptsDelegate() {
+		HealthIndicator indicator = () -> Health.up().withDetail(""spring"", ""boot"").build();
+		CompositeHealthContributor delegate = CompositeHealthContributor
+			.fromMap(Collections.singletonMap(""test"", indicator));
+		CompositeHealthContributorReactiveAdapter adapter = new CompositeHealthContributorReactiveAdapter(delegate);
+		Iterator<NamedContributor<ReactiveHealthContributor>> iterator = adapter.iterator();
+		assertThat(iterator.hasNext()).isTrue();
+		NamedContributor<ReactiveHealthContributor> adapted = iterator.next();
+		assertThat(adapted.getName()).isEqualTo(""test"");
+		assertThat(adapted.getContributor()).isInstanceOf(ReactiveHealthIndicator.class);
+		Health health = ((ReactiveHealthIndicator) adapted.getContributor()).getHealth(true).block();
+		assertThat(health.getStatus()).isEqualTo(Status.UP);
+		assertThat(health.getDetails()).containsEntry(""spring"", ""boot"");
+	}","15"
+"/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/web/embedded/tomcat/TomcatStarter.java::onStartup","/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/web/embedded/tomcat/TomcatStarter.java","onStartup","@Override
+	public void onStartup(Set<Class<?>> classes, ServletContext servletContext) throws ServletException {
+		try {
+			for (ServletContextInitializer initializer : this.initializers) {
+				initializer.onStartup(servletContext);
+			}
+		}
+		catch (Exception ex) {
+			this.startUpException = ex;
+			// Prevent Tomcat from logging and re-throwing when we know we can
+			// deal with it in the main thread, but log for information here.
+			if (logger.isErrorEnabled()) {
+				logger.error(""Error starting Tomcat context. Exception: "" + ex.getClass().getName() + "". Message: ""
+						+ ex.getMessage());
+			}
+		}
+	}","15"
+"/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/java-design-patterns/commander/src/main/java/com/iluwatar/commander/AppAllCases.java::shippingSuccessCase","/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/java-design-patterns/commander/src/main/java/com/iluwatar/commander/AppAllCases.java","shippingSuccessCase","void shippingSuccessCase() {
+    var ps = new PaymentService(new PaymentDatabase());
+    var ss = new ShippingService(new ShippingDatabase(), new ItemUnavailableException());
+    var ms = new MessagingService(new MessagingDatabase(), new DatabaseUnavailableException());
+    var eh =
+        new EmployeeHandle(
+            new EmployeeDatabase(),
+            new DatabaseUnavailableException(),
+            new DatabaseUnavailableException());
+    var qdb = new QueueDatabase();
+    var c = new Commander(eh, ps, ss, ms, qdb, retryParams, timeLimits);
+    var user = new User(""Jim"", ""ABCD"");
+    var order = new Order(user, ""book"", 10f);
+    c.placeOrder(order);
+  }","15"
+"/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/java-design-patterns/retry/src/test/java/com/iluwatar/retry/RetryExponentialBackoffTest.java::attempts","/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/java-design-patterns/retry/src/test/java/com/iluwatar/retry/RetryExponentialBackoffTest.java","attempts","@Test
+  void attempts() {
+    final var e = new BusinessException(""unhandled"");
+    final var retry =
+        new RetryExponentialBackoff<String>(
+            () -> {
+              throw e;
+            },
+            2,
+            0);
+    try {
+      retry.perform();
+    } catch (BusinessException ex) {
+      // ignore
+    }
+
+    assertThat(retry.attempts(), is(1));
+  }","16"
+"/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/batch/BatchAutoConfigurationWithoutJpaTests.java::jdbcWithDefaultSettings","/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/batch/BatchAutoConfigurationWithoutJpaTests.java","jdbcWithDefaultSettings","@Test
+	void jdbcWithDefaultSettings() {
+		this.contextRunner.withUserConfiguration(DefaultConfiguration.class, EmbeddedDataSourceConfiguration.class)
+			.withPropertyValues(""spring.datasource.generate-unique-name=true"")
+			.run((context) -> {
+				assertThat(context).hasSingleBean(JobLauncher.class);
+				assertThat(context).hasSingleBean(JobExplorer.class);
+				assertThat(context).hasSingleBean(JobRepository.class);
+				assertThat(context.getBean(BatchProperties.class).getJdbc().getInitializeSchema())
+					.isEqualTo(DatabaseInitializationMode.EMBEDDED);
+				assertThat(new JdbcTemplate(context.getBean(DataSource.class))
+					.queryForList(""select * from BATCH_JOB_EXECUTION"")).isEmpty();
+				assertThat(context.getBean(JobExplorer.class).findRunningJobExecutions(""test"")).isEmpty();
+				assertThat(context.getBean(JobRepository.class).getLastJobExecution(""test"", new JobParameters()))
+					.isNull();
+			});
+	}","17"
+"/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot-autoconfigure/src/main/java/org/springframework/boot/autoconfigure/amqp/CachingConnectionFactoryConfigurer.java::configure","/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot-autoconfigure/src/main/java/org/springframework/boot/autoconfigure/amqp/CachingConnectionFactoryConfigurer.java","configure","@Override
+	public void configure(CachingConnectionFactory connectionFactory, RabbitProperties rabbitProperties) {
+		PropertyMapper map = PropertyMapper.get();
+		map.from(rabbitProperties::isPublisherReturns).to(connectionFactory::setPublisherReturns);
+		map.from(rabbitProperties::getPublisherConfirmType)
+			.whenNonNull()
+			.to(connectionFactory::setPublisherConfirmType);
+		RabbitProperties.Cache.Channel channel = rabbitProperties.getCache().getChannel();
+		map.from(channel::getSize).whenNonNull().to(connectionFactory::setChannelCacheSize);
+		map.from(channel::getCheckoutTimeout)
+			.whenNonNull()
+			.as(Duration::toMillis)
+			.to(connectionFactory::setChannelCheckoutTimeout);
+		RabbitProperties.Cache.Connection connection = rabbitProperties.getCache().getConnection();
+		map.from(connection::getMode).whenNonNull().to(connectionFactory::setCacheMode);
+		map.from(connection::getSize).whenNonNull().to(connectionFactory::setConnectionCacheSize);
+	}","17"
+"/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot-actuator-autoconfigure/src/main/java/org/springframework/boot/actuate/autoconfigure/logging/LogFileWebEndpointAutoConfiguration.java::getMatchOutcome","/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot-actuator-autoconfigure/src/main/java/org/springframework/boot/actuate/autoconfigure/logging/LogFileWebEndpointAutoConfiguration.java","getMatchOutcome","@Override
+		public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			Environment environment = context.getEnvironment();
+			String config = getLogFileConfig(environment, LogFile.FILE_NAME_PROPERTY);
+			ConditionMessage.Builder message = ConditionMessage.forCondition(""Log File"");
+			if (StringUtils.hasText(config)) {
+				return ConditionOutcome.match(message.found(LogFile.FILE_NAME_PROPERTY).items(config));
+			}
+			config = getLogFileConfig(environment, LogFile.FILE_PATH_PROPERTY);
+			if (StringUtils.hasText(config)) {
+				return ConditionOutcome.match(message.found(LogFile.FILE_PATH_PROPERTY).items(config));
+			}
+			config = environment.getProperty(""management.endpoint.logfile.external-file"");
+			if (StringUtils.hasText(config)) {
+				return ConditionOutcome.match(message.found(""management.endpoint.logfile.external-file"").items(config));
+			}
+			return ConditionOutcome.noMatch(message.didNotFind(""logging file"").atAll());
+		}","18"
+"/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/java-design-patterns/game-loop/src/main/java/com/iluwatar/gameloop/FixedStepGameLoop.java::processGameLoop","/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/java-design-patterns/game-loop/src/main/java/com/iluwatar/gameloop/FixedStepGameLoop.java","processGameLoop","@Override
+  protected void processGameLoop() {
+    var previousTime = System.currentTimeMillis();
+    var lag = 0L;
+    while (isGameRunning()) {
+      var currentTime = System.currentTimeMillis();
+      var elapsedTime = currentTime - previousTime;
+      previousTime = currentTime;
+      lag += elapsedTime;
+
+      processInput();
+
+      while (lag >= MS_PER_FRAME) {
+        update();
+        lag -= MS_PER_FRAME;
+      }
+
+      render();
+    }
+  }","17"
+"/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot-tools/spring-boot-cli/src/main/java/org/springframework/boot/cli/command/core/HelpCommand.java::run","/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot-tools/spring-boot-cli/src/main/java/org/springframework/boot/cli/command/core/HelpCommand.java","run","@Override
+	public ExitStatus run(String... args) throws Exception {
+		if (args.length == 0) {
+			throw new NoHelpCommandArgumentsException();
+		}
+		String commandName = args[0];
+		for (Command command : this.commandRunner) {
+			if (command.getName().equals(commandName)) {
+				Log.info(this.commandRunner.getName() + command.getName() + "" - "" + command.getDescription());
+				Log.info("""");
+				if (command.getUsageHelp() != null) {
+					Log.info(""usage: "" + this.commandRunner.getName() + command.getName() + "" ""
+							+ command.getUsageHelp());
+					Log.info("""");
+				}
+				if (command.getHelp() != null) {
+					Log.info(command.getHelp());
+				}
+				Collection<HelpExample> examples = command.getExamples();
+				if (examples != null) {
+					Log.info((examples.size() != 1) ? ""examples:"" : ""example:"");
+					Log.info("""");
+					for (HelpExample example : examples) {
+						Log.info(""    "" + example.getDescription() + "":"");
+						Log.info(""        $ "" + example.getExample());
+						Log.info("""");
+					}
+					Log.info("""");
+				}
+				return ExitStatus.OK;
+			}
+		}
+		throw new NoSuchCommandException(commandName);
+	}","34"
+"/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot-test/src/main/java/org/springframework/boot/test/context/runner/AbstractApplicationContextRunner.java::withContextClassLoader","/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot-test/src/main/java/org/springframework/boot/test/context/runner/AbstractApplicationContextRunner.java","withContextClassLoader","private void withContextClassLoader(ClassLoader classLoader, Runnable action) {
+		if (classLoader == null) {
+			action.run();
+		}
+		else {
+			Thread currentThread = Thread.currentThread();
+			ClassLoader previous = currentThread.getContextClassLoader();
+			currentThread.setContextClassLoader(classLoader);
+			try {
+				action.run();
+			}
+			finally {
+				currentThread.setContextClassLoader(previous);
+			}
+		}
+	}","16"
+"/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/neo4j/Neo4jHealthIndicator.java::doHealthCheck","/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/neo4j/Neo4jHealthIndicator.java","doHealthCheck","@Override
+	protected void doHealthCheck(Health.Builder builder) {
+		try {
+			try {
+				runHealthCheckQuery(builder);
+			}
+			catch (SessionExpiredException ex) {
+				// Retry one time when the session has been expired
+				logger.warn(MESSAGE_SESSION_EXPIRED);
+				runHealthCheckQuery(builder);
+			}
+		}
+		catch (Exception ex) {
+			builder.down().withException(ex);
+		}
+	}","15"
+"/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/web/servlet/server/DocumentRoot.java::getCodeSourceArchive","/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/web/servlet/server/DocumentRoot.java","getCodeSourceArchive","File getCodeSourceArchive(CodeSource codeSource) {
+		try {
+			URL location = (codeSource != null) ? codeSource.getLocation() : null;
+			if (location == null) {
+				return null;
+			}
+			String path;
+			URLConnection connection = location.openConnection();
+			if (connection instanceof JarURLConnection jarURLConnection) {
+				path = jarURLConnection.getJarFile().getName();
+			}
+			else {
+				path = location.toURI().getPath();
+			}
+			int index = path.indexOf(""!/"");
+			if (index != -1) {
+				path = path.substring(0, index);
+			}
+			return new File(path);
+		}
+		catch (Exception ex) {
+			return null;
+		}
+	}","24"
+"/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/java-design-patterns/master-worker/src/main/java/com/iluwatar/masterworker/system/systemmaster/ArrayTransposeMaster.java::aggregateData","/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/java-design-patterns/master-worker/src/main/java/com/iluwatar/masterworker/system/systemmaster/ArrayTransposeMaster.java","aggregateData","@Override
+  ArrayResult aggregateData() {
+    // number of rows in final result is number of rows in any of obtained results from workers
+    var allResultData = this.getAllResultData();
+    var rows = ((ArrayResult) allResultData.elements().nextElement()).data.length;
+    var elements = allResultData.elements();
+    var columns = 0; // columns = sum of number of columns in all results obtained from workers
+    while (elements.hasMoreElements()) {
+      columns += ((ArrayResult) elements.nextElement()).data[0].length;
+    }
+    var resultData = new int[rows][columns];
+    var columnsDone = 0; // columns aggregated so far
+    var workers = this.getWorkers();
+    for (var i = 0; i < this.getExpectedNumResults(); i++) {
+      // result obtained from ith worker
+      var worker = workers.get(i);
+      var workerId = worker.getWorkerId();
+      var work = ((ArrayResult) allResultData.get(workerId)).data;
+      for (var m = 0; m < work.length; m++) {
+        // m = row number, n = columns number
+        System.arraycopy(work[m], 0, resultData[m], columnsDone, work[0].length);
+      }
+      columnsDone += work[0].length;
+    }
+    return new ArrayResult(resultData);
+  }","23"
+"/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot-actuator-autoconfigure/src/test/java/org/springframework/boot/actuate/autoconfigure/web/mappings/MappingsEndpointReactiveDocumentationTests.java::mappings","/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot-actuator-autoconfigure/src/test/java/org/springframework/boot/actuate/autoconfigure/web/mappings/MappingsEndpointReactiveDocumentationTests.java","mappings","@Test
+	void mappings() {
+		List<FieldDescriptor> requestMappingConditions = List.of(
+				requestMappingConditionField("""").description(""Details of the request mapping conditions."").optional(),
+				requestMappingConditionField("".consumes"").description(""Details of the consumes condition""),
+				requestMappingConditionField("".consumes.[].mediaType"").description(""Consumed media type.""),
+				requestMappingConditionField("".consumes.[].negated"").description(""Whether the media type is negated.""),
+				requestMappingConditionField("".headers"").description(""Details of the headers condition.""),
+				requestMappingConditionField("".headers.[].name"").description(""Name of the header.""),
+				requestMappingConditionField("".headers.[].value"").description(""Required value of the header, if any.""),
+				requestMappingConditionField("".headers.[].negated"").description(""Whether the value is negated.""),
+				requestMappingConditionField("".methods"").description(""HTTP methods that are handled.""),
+				requestMappingConditionField("".params"").description(""Details of the params condition.""),
+				requestMappingConditionField("".params.[].name"").description(""Name of the parameter.""),
+				requestMappingConditionField("".params.[].value"")
+					.description(""Required value of the parameter, if any.""),
+				requestMappingConditionField("".params.[].negated"").description(""Whether the value is negated.""),
+				requestMappingConditionField("".patterns"")
+					.description(""Patterns identifying the paths handled by the mapping.""),
+				requestMappingConditionField("".produces"").description(""Details of the produces condition.""),
+				requestMappingConditionField("".produces.[].mediaType"").description(""Produced media type.""),
+				requestMappingConditionField("".produces.[].negated"").description(""Whether the media type is negated.""));
+		List<FieldDescriptor> handlerMethod = List.of(
+				fieldWithPath(""*.[].details.handlerMethod"").optional()
+					.type(JsonFieldType.OBJECT)
+					.description(""Details of the method, if any, that will handle requests to this mapping.""),
+				fieldWithPath(""*.[].details.handlerMethod.className"").type(JsonFieldType.STRING)
+					.description(""Fully qualified name of the class of the method.""),
+				fieldWithPath(""*.[].details.handlerMethod.name"").type(JsonFieldType.STRING)
+					.description(""Name of the method.""),
+				fieldWithPath(""*.[].details.handlerMethod.descriptor"").type(JsonFieldType.STRING)
+					.description(""Descriptor of the method as specified in the Java Language Specification.""));
+		List<FieldDescriptor> handlerFunction = List.of(
+				fieldWithPath(""*.[].details.handlerFunction"").optional()
+					.type(JsonFieldType.OBJECT)
+					.description(""Details of the function, if any, that will handle requests to this mapping.""),
+				fieldWithPath(""*.[].details.handlerFunction.className"").type(JsonFieldType.STRING)
+					.description(""Fully qualified name of the class of the function.""));
+		List<FieldDescriptor> dispatcherHandlerFields = new ArrayList<>(List.of(
+				fieldWithPath(""*"")
+					.description(""Dispatcher handler mappings, if any, keyed by dispatcher handler bean name.""),
+				fieldWithPath(""*.[].details"").optional()
+					.type(JsonFieldType.OBJECT)
+					.description(""Additional implementation-specific details about the mapping. Optional.""),
+				fieldWithPath(""*.[].handler"").description(""Handler for the mapping.""),
+				fieldWithPath(""*.[].predicate"").description(""Predicate for the mapping."")));
+		dispatcherHandlerFields.addAll(requestMappingConditions);
+		dispatcherHandlerFields.addAll(handlerMethod);
+		dispatcherHandlerFields.addAll(handlerFunction);
+		this.client.get()
+			.uri(""/actuator/mappings"")
+			.exchange()
+			.expectStatus()
+			.isOk()
+			.expectBody()
+			.consumeWith(document(""mappings"", responseFields(
+					beneathPath(""contexts.*.mappings.dispatcherHandlers"").withSubsectionId(""dispatcher-handlers""),
+					dispatcherHandlerFields)));
+	}","59"
+"/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/data/redis/RedisAutoConfigurationTests.java::redisConnectionDetails","/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/data/redis/RedisAutoConfigurationTests.java","redisConnectionDetails","@Bean
+		RedisConnectionDetails redisConnectionDetails() {
+			return new RedisConnectionDetails() {
+
+				@Override
+				public String getUsername() {
+					return ""user-1"";
+				}
+
+				@Override
+				public String getPassword() {
+					return ""password-1"";
+				}
+
+				@Override
+				public Cluster getCluster() {
+					return new Cluster() {
+
+						@Override
+						public List<Node> getNodes() {
+							return List.of(new Node(""node-1"", 12345), new Node(""node-2"", 23456));
+						}
+
+					};
+				}
+
+			};
+		}","22"
+"/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/java-design-patterns/microservices-api-gateway/api-gateway-service/src/main/java/com/iluwatar/api/gateway/ImageClientImpl.java::getImagePath","/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/java-design-patterns/microservices-api-gateway/api-gateway-service/src/main/java/com/iluwatar/api/gateway/ImageClientImpl.java","getImagePath","@Override
+  public String getImagePath() {
+
+    var httpClient = HttpClient.newHttpClient();
+    var httpGet =
+        HttpRequest.newBuilder().GET().uri(URI.create(""http://localhost:50005/image-path"")).build();
+
+    try {
+      LOGGER.info(""Sending request to fetch image path"");
+      var httpResponse = httpClient.send(httpGet, BodyHandlers.ofString());
+      logResponse(httpResponse);
+      return httpResponse.body();
+    } catch (IOException ioe) {
+      LOGGER.error(""Failure occurred while getting image path"", ioe);
+    } catch (InterruptedException ie) {
+      LOGGER.error(""Failure occurred while getting image path"", ie);
+      Thread.currentThread().interrupt();
+    }
+
+    return null;
+  }","18"
+"/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-tests/spring-boot-smoke-tests/spring-boot-smoke-test-websocket-undertow/src/main/java/smoketest/websocket/undertow/snake/Snake.java::update","/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-tests/spring-boot-smoke-tests/spring-boot-smoke-test-websocket-undertow/src/main/java/smoketest/websocket/undertow/snake/Snake.java","update","public void update(Collection<Snake> snakes) throws Exception {
+		synchronized (this.monitor) {
+			Location nextLocation = this.head.getAdjacentLocation(this.direction);
+			if (nextLocation.x >= SnakeUtils.PLAYFIELD_WIDTH) {
+				nextLocation.x = 0;
+			}
+			if (nextLocation.y >= SnakeUtils.PLAYFIELD_HEIGHT) {
+				nextLocation.y = 0;
+			}
+			if (nextLocation.x < 0) {
+				nextLocation.x = SnakeUtils.PLAYFIELD_WIDTH;
+			}
+			if (nextLocation.y < 0) {
+				nextLocation.y = SnakeUtils.PLAYFIELD_HEIGHT;
+			}
+			if (this.direction != Direction.NONE) {
+				this.tail.addFirst(this.head);
+				if (this.tail.size() > this.length) {
+					this.tail.removeLast();
+				}
+				this.head = nextLocation;
+			}
+
+			handleCollisions(snakes);
+		}
+	}","25"
+"/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/webservices/client/WebServiceTemplateBuilder.java::configure","/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/webservices/client/WebServiceTemplateBuilder.java","configure","public <T extends WebServiceTemplate> T configure(T webServiceTemplate) {
+		Assert.notNull(webServiceTemplate, ""'webServiceTemplate' must not be null"");
+		configureMessageSenders(webServiceTemplate);
+		PropertyMapper map = PropertyMapper.get().alwaysApplyingWhenNonNull();
+		applyCustomizers(webServiceTemplate, this.internalCustomizers);
+		map.from(this.marshaller).to(webServiceTemplate::setMarshaller);
+		map.from(this.unmarshaller).to(webServiceTemplate::setUnmarshaller);
+		map.from(this.destinationProvider).to(webServiceTemplate::setDestinationProvider);
+		map.from(this.transformerFactoryClass).to(webServiceTemplate::setTransformerFactoryClass);
+		map.from(this.messageFactory).to(webServiceTemplate::setMessageFactory);
+		if (!CollectionUtils.isEmpty(this.interceptors)) {
+			Set<ClientInterceptor> merged = new LinkedHashSet<>(this.interceptors);
+			if (webServiceTemplate.getInterceptors() != null) {
+				merged.addAll(Arrays.asList(webServiceTemplate.getInterceptors()));
+			}
+			webServiceTemplate.setInterceptors(merged.toArray(new ClientInterceptor[0]));
+		}
+		applyCustomizers(webServiceTemplate, this.customizers);
+		return webServiceTemplate;
+	}","20"
+"/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/context/config/ConfigDataLocationRuntimeHintsTests.java::registerWithCustomLocation","/Users/durjoy/Documents/Lab CSSE/Github_repos/Java/spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/context/config/ConfigDataLocationRuntimeHintsTests.java","registerWithCustomLocation","@Test
+	@WithResource(name = ""application.properties"")
+	@WithResource(name = ""config/application.properties"")
+	void registerWithCustomLocation() {
+		RuntimeHints hints = new RuntimeHints();
+		new TestConfigDataLocationRuntimeHints() {
+			@Override
+			protected List<String> getLocations(ClassLoader classLoader) {
+				return List.of(""config/"");
+			}
+		}.registerHints(hints, Thread.currentThread().getContextClassLoader());
+		assertThat(hints.resources().resourcePatternHints()).singleElement()
+			.satisfies(includes(""config/application*.properties"", ""config/application*.xml"", ""config/application*.yaml"",
+					""config/application*.yml""));
+	}","15"
