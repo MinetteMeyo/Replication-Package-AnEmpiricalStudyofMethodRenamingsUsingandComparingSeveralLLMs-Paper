@@ -227,7 +227,7 @@ async function processCsv(inputCsv, outputCsv) {
 // MAIN
 if (require.main === module) {
   // Hardcode or get from args
-  const inputCsv = '/Users/durjoy/Documents/Lab CSSE/Result_files/JavaScript/random_methods_javascript.csv';
-  const outputCsv = '/Users/durjoy/Documents/Lab CSSE/Result_files/JavaScript/gpt4o_suggestedMethodNames_javaScript.csv';
+  const inputCsv = '/Users/durjoy/Documents/Lab CSSE/NamingRefactoring/Result_files/JavaScript/random_methods_javascript.csv';
+  const outputCsv = '/Users/durjoy/Documents/Lab CSSE/NamingRefactoring/Result_files/JavaScript/gpt4o_suggestedMethodNames_javaScript.csv';
   processCsv(inputCsv, outputCsv).catch(e => console.error(`Error processing CSV: ${e}`));
 } 
