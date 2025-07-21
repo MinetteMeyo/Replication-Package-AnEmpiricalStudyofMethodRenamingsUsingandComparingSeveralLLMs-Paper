@@ -96,7 +96,7 @@ function isTestMethod(methodName, filePath) {
 }
 
 function findMethods(filepath, targetLines, variance) {
-    // Finds all methods in a JavaScript file that match criteria.
+    // Finds all top-level named function declarations in a JavaScript file that match criteria.
     const methods = [];
     
     // Skip large files
@@ -116,80 +116,42 @@ function findMethods(filepath, targetLines, variance) {
             locations: true
         });
         
-        // Walk through the AST
-        function walkNode(node) {
-            if (node.type === 'FunctionDeclaration' || 
-                node.type === 'FunctionExpression' ||
-                node.type === 'ArrowFunctionExpression' ||
-                node.type === 'MethodDefinition') {
-                
-                let methodName = '';
-                let methodNode = node;
-                
-                // Handle different function types
-                if (node.type === 'FunctionDeclaration') {
-                    methodName = node.id ? node.id.name : 'anonymous';
-                } else if (node.type === 'FunctionExpression') {
-                    methodName = node.id ? node.id.name : 'anonymous';
-                } else if (node.type === 'ArrowFunctionExpression') {
-                    methodName = 'arrow_function';
-                } else if (node.type === 'MethodDefinition') {
-                    methodName = node.key.name || node.key.value;
-                    methodNode = node.value;
-                }
-                
-                // Skip test methods and magic methods
-                if (isTestMethod(methodName, filepath) || 
-                    (methodName.startsWith('_') && methodName.endsWith('_'))) {
-                    return;
-                }
-                
-                // Skip simple methods (just a return or single expression)
-                if (methodNode.body.type === 'BlockStatement') {
-                    if (methodNode.body.body.length <= 1) {
-                        const firstStmt = methodNode.body.body[0];
-                        if (!firstStmt || 
-                            firstStmt.type === 'ReturnStatement' ||
-                            firstStmt.type === 'ExpressionStatement') {
-                            return;
+        // Only walk top-level nodes
+        if (ast.body && Array.isArray(ast.body)) {
+            for (const node of ast.body) {
+                if (node.type === 'FunctionDeclaration' && node.id && typeof node.id.name === 'string' && node.id.name.trim() !== '') {
+                    const methodName = node.id.name;
+                    // Skip test methods and magic methods and constructors
+                    if (isTestMethod(methodName, filepath) ||
+                        (methodName.startsWith('_') && methodName.endsWith('_')) ||
+                        methodName === 'constructor') {
+                        continue;
+                    }
+                    // Skip simple methods (just a return or single expression)
+                    if (node.body && node.body.type === 'BlockStatement') {
+                        if (node.body.body.length <= 1) {
+                            const firstStmt = node.body.body[0];
+                            if (!firstStmt || 
+                                firstStmt.type === 'ReturnStatement' ||
+                                firstStmt.type === 'ExpressionStatement') {
+                                continue;
+                            }
                         }
                     }
-                }
-                
-                // Extract method body
-                const methodBody = extractMethodBody(filepath, methodNode, code);
-                
-                // Count actual code lines
-                const lineCount = countNonCommentLines(methodBody);
-                
-                // Check if the method is within the target line count range
-                if (targetLines - variance <= lineCount && lineCount <= targetLines + variance) {
-                    // Determine fully qualified name based on context
-                    const moduleName = path.basename(filepath, '.js');
-                    const fullyQualifiedName = `${moduleName}::${methodName}`;
-                    
-                    methods.push([fullyQualifiedName, filepath, methodName, methodBody, lineCount]);
-                }
-            }
-            
-            // Recursively walk child nodes
-            for (const key in node) {
-                if (node[key] && typeof node[key] === 'object') {
-                    if (Array.isArray(node[key])) {
-                        node[key].forEach(child => {
-                            if (child && typeof child === 'object' && child.type) {
-                                walkNode(child);
-                            }
-                        });
-                    } else if (node[key].type) {
-                        walkNode(node[key]);
+                    // Extract method body
+                    const methodBody = extractMethodBody(filepath, node, code);
+                    // Count actual code lines
+                    const lineCount = countNonCommentLines(methodBody);
+                    // Check if the method is within the target line count range
+                    if (targetLines - variance <= lineCount && lineCount <= targetLines + variance) {
+                        // Determine fully qualified name based on context
+                        const moduleName = path.basename(filepath, '.js');
+                        const fullyQualifiedName = `${moduleName}::${methodName}`;
+                        methods.push([fullyQualifiedName, filepath, methodName, methodBody, lineCount]);
                     }
                 }
             }
         }
-        
-        walkNode(ast);
-        
     } catch (error) {
         console.log(`Error processing ${filepath}: ${error}`);
     }
@@ -305,7 +267,7 @@ if (require.main === module) {
     
     processRepositories(
         repositories, 
-        "/Users/durjoy/Documents/Lab CSSE/Result_files/JavaScript/random_methods_javascript.csv", 
+        "/Users/durjoy/Documents/Lab CSSE/NamingRefactoring/Result_files/JavaScript/random_methods_javascript.csv", 
         targetLines = 50, 
         variance = 20
     );
