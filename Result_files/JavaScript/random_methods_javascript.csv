@@ -1,1016 +1,983 @@
 Fully Qualified Name,File Path,Method Name,Method Body,Line Count
-store::anonymous,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/deps/npm/node_modules/tuf-js/dist/store.js,anonymous,"(bytesBuffer) {
-        if (this.snapshot) {
-            throw new error_1.RuntimeError('Cannot update timestamp after snapshot');
-        }
-        if (this.root.signed.isExpired(this.referenceTime)) {
-            throw new error_1.ExpiredMetadataError('Final root.json is expired');
-        }
-        const data = JSON.parse(bytesBuffer.toString('utf8'));
-        const newTimestamp = models_1.Metadata.fromJSON(models_1.MetadataKind.Timestamp, data);
-        if (newTimestamp.signed.type != models_1.MetadataKind.Timestamp) {
-            throw new error_1.RepositoryError(`Expected 'timestamp', got ${newTimestamp.signed.type}`);
-        }
-        // Client workflow 5.4.2: check for arbitrary software attack
-        this.root.verifyDelegate(models_1.MetadataKind.Timestamp, newTimestamp);
-        if (this.timestamp) {
-            // Prevent rolling back timestamp version
-            // Client workflow 5.4.3.1: check for rollback attack
-            if (newTimestamp.signed.version < this.timestamp.signed.version) {
-                throw new error_1.BadVersionError(`New timestamp version ${newTimestamp.signed.version} is less than current version ${this.timestamp.signed.version}`);
-            }
-            //  Keep using old timestamp if versions are equal.
-            if (newTimestamp.signed.version === this.timestamp.signed.version) {
-                throw new error_1.EqualVersionError(`New timestamp version ${newTimestamp.signed.version} is equal to current version ${this.timestamp.signed.version}`);
-            }
-            // Prevent rolling back snapshot version
-            // Client workflow 5.4.3.2: check for rollback attack
-            const snapshotMeta = this.timestamp.signed.snapshotMeta;
-            const newSnapshotMeta = newTimestamp.signed.snapshotMeta;
-            if (newSnapshotMeta.version < snapshotMeta.version) {
-                throw new error_1.BadVersionError(`New snapshot version ${newSnapshotMeta.version} is less than current version ${snapshotMeta.version}`);
-            }
-        }
-        // expiry not checked to allow old timestamp to be used for rollback
-        // protection of new timestamp: expiry is checked in update_snapshot
-        this.trustedSet.timestamp = newTimestamp;
-        // Client workflow 5.4.4: check for freeze attack
-        this.checkFinalTimestamp();
-        return newTimestamp;
-    }",30
-deepequal-buffer::main,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/benchmark/assert/deepequal-buffer.js,main,"function main({ len, n, method, strict, arrayBuffer }) {
-  let actual = Buffer.alloc(len);
-  let expected = Buffer.alloc(len + Number(method === 'unequal_length'));
-
-  if (method === 'unequal_length') {
-    method = 'notDeepEqual';
+SyntheticEvent::SyntheticEvent,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/react/packages/react-native-renderer/src/legacy-events/SyntheticEvent.js,SyntheticEvent,"function SyntheticEvent(
+  dispatchConfig,
+  targetInst,
+  nativeEvent,
+  nativeEventTarget,
+) {
+  if (__DEV__) {
+    // these have a getter/setter for warnings
+    delete this.nativeEvent;
+    delete this.preventDefault;
+    delete this.stopPropagation;
+    delete this.isDefaultPrevented;
+    delete this.isPropagationStopped;
   }
 
-  if (method === 'partial') {
-    method = 'partialDeepStrictEqual';
-  } else if (strict) {
-    method = method.replace('eep', 'eepStrict');
+  this.dispatchConfig = dispatchConfig;
+  this._targetInst = targetInst;
+  this.nativeEvent = nativeEvent;
+  this._dispatchListeners = null;
+  this._dispatchInstances = null;
+
+  const Interface = this.constructor.Interface;
+  for (const propName in Interface) {
+    if (!Interface.hasOwnProperty(propName)) {
+      continue;
+    }
+    if (__DEV__) {
+      delete this[propName]; // this has a getter/setter for warnings
+    }
+    const normalize = Interface[propName];
+    if (normalize) {
+      this[propName] = normalize(nativeEvent);
+    } else {
+      if (propName === 'target') {
+        this.target = nativeEventTarget;
+      } else {
+        this[propName] = nativeEvent[propName];
+      }
+    }
   }
 
-  for (let i = 0; i < len; i++) {
-    actual.writeInt8(i % 128, i);
-    expected.writeInt8(i % 128, i);
+  const defaultPrevented =
+    nativeEvent.defaultPrevented != null
+      ? nativeEvent.defaultPrevented
+      : nativeEvent.returnValue === false;
+  if (defaultPrevented) {
+    this.isDefaultPrevented = functionThatReturnsTrue;
+  } else {
+    this.isDefaultPrevented = functionThatReturnsFalse;
+  }
+  this.isPropagationStopped = functionThatReturnsFalse;
+  return this;
+}",49
+myers_diff::printMyersDiff,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/lib/internal/assert/myers_diff.js,printMyersDiff,"function printMyersDiff(diff, operator) {
+  let message = '';
+  let skipped = false;
+  let nopCount = 0;
+
+  for (let diffIdx = diff.length - 1; diffIdx >= 0; diffIdx--) {
+    const { 0: operation, 1: value } = diff[diffIdx];
+    const previousOperation = diffIdx < diff.length - 1 ? diff[diffIdx + 1][0] : null;
+
+    // Avoid grouping if only one line would have been grouped otherwise
+    if (previousOperation === kOperations.NOP && operation !== previousOperation) {
+      if (nopCount === kNopLinesToCollapse + 1) {
+        message += `${colors.white}  ${diff[diffIdx + 1][1]}\n`;
+      } else if (nopCount === kNopLinesToCollapse + 2) {
+        message += `${colors.white}  ${diff[diffIdx + 2][1]}\n`;
+        message += `${colors.white}  ${diff[diffIdx + 1][1]}\n`;
+      } else if (nopCount >= kNopLinesToCollapse + 3) {
+        message += `${colors.blue}...${colors.white}\n`;
+        message += `${colors.white}  ${diff[diffIdx + 1][1]}\n`;
+        skipped = true;
+      }
+      nopCount = 0;
+    }
+
+    if (operation === kOperations.INSERT) {
+      if (operator === 'partialDeepStrictEqual') {
+        message += `${colors.gray}${colors.hasColors ? ' ' : '+'} ${value}${colors.white}\n`;
+      } else {
+        message += `${colors.green}+${colors.white} ${value}\n`;
+      }
+    } else if (operation === kOperations.DELETE) {
+      message += `${colors.red}-${colors.white} ${value}\n`;
+    } else if (operation === kOperations.NOP) {
+      if (nopCount < kNopLinesToCollapse) {
+        message += `${colors.white}  ${value}\n`;
+      }
+      nopCount++;
+    }
   }
 
-  if (method.includes('not')) {
-    const position = Math.floor(len / 2);
-    expected[position] = expected[position] + 1;
+  message = message.trimEnd();
+
+  return { message: `\n${message}`, skipped };
+}",38
+region::prerenderApp,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/react/fixtures/flight/server/region.js,prerenderApp,"async function prerenderApp(res, returnValue, formState) {
+  const {unstable_prerenderToNodeStream: prerenderToNodeStream} = await import(
+    'react-server-dom-webpack/static'
+  );
+  // const m = require('../src/App.js');
+  const m = await import('../src/App.js');
+
+  let moduleMap;
+  let mainCSSChunks;
+  if (process.env.NODE_ENV === 'development') {
+    // Read the module map from the HMR server in development.
+    moduleMap = await (
+      await fetch('http://localhost:3000/react-client-manifest.json')
+    ).json();
+    mainCSSChunks = (
+      await (
+        await fetch('http://localhost:3000/entrypoint-manifest.json')
+      ).json()
+    ).main.css;
+  } else {
+    // Read the module map from the static build in production.
+    moduleMap = JSON.parse(
+      await readFile(
+        path.resolve(__dirname, `../build/react-client-manifest.json`),
+        'utf8'
+      )
+    );
+    mainCSSChunks = JSON.parse(
+      await readFile(
+        path.resolve(__dirname, `../build/entrypoint-manifest.json`),
+        'utf8'
+      )
+    ).main.css;
+  }
+  const App = m.default.default || m.default;
+  const root = React.createElement(
+    React.Fragment,
+    null,
+    // Prepend the App's tree with stylesheets required for this entrypoint.
+    mainCSSChunks.map(filename =>
+      React.createElement('link', {
+        rel: 'stylesheet',
+        href: filename,
+        precedence: 'default',
+        key: filename,
+      })
+    ),
+    React.createElement(App, {prerender: true})
+  );
+  // For client-invoked server actions we refresh the tree and return a return value.
+  const payload = {root, returnValue, formState};
+  const {prelude} = await prerenderToNodeStream(payload, moduleMap);
+  prelude.pipe(res);
+}",48
+text-encoder::main,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/benchmark/util/text-encoder.js,main,"function main({ n, op, len, type }) {
+  const encoder = new TextEncoder();
+  let base = '';
+
+  switch (type) {
+    case 'ascii':
+      base = 'a';
+      break;
+    case 'one-byte-string':
+      base = '\xff';
+      break;
+    case 'two-byte-string':
+      base = 'ğ';
+      break;
   }
 
-  const fn = assert[method];
+  const input = base.repeat(len);
+  if (op === 'encode') {
+    const expected = encoder.encode(input);
+    let result;
+    bench.start();
+    for (let i = 0; i < n; i++)
+      result = encoder.encode(input);
+    bench.end(n);
+    assert.deepStrictEqual(result, expected);
+  } else {
+    const expected = new Uint8Array(len);
+    const subarray = new Uint8Array(len);
+    const expectedStats = encoder.encodeInto(input, expected);
+    let result;
+    bench.start();
+    for (let i = 0; i < n; i++)
+      result = encoder.encodeInto(input, subarray);
+    bench.end(n);
+    assert.deepStrictEqual(subarray, expected);
+    assert.deepStrictEqual(result, expectedStats);
+  }
+}",36
+documented-errors::getErrorsInDoc,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/tools/eslint-rules/documented-errors.js,getErrorsInDoc,"function getErrorsInDoc() {
+  const lines = doc.split('\n');
+  let currentHeader;
+  const errors = new Set();
+  const legacyErrors = new Set();
+  const codePattern = /^### `([^`]+)`$/;
+  const anchorPattern = /^<a id=""([^""]+)""><\/a>$/;
 
-  if (arrayBuffer) {
-    actual = actual.buffer;
-    expected = expected.buffer;
+  let previousAnchor;
+
+  function parse(line, legacy, lineNumber) {
+    const anchorMatch = anchorPattern.exec(line);
+    if (anchorMatch) {
+      const code = anchorMatch[1];
+      if (previousAnchor != null && previousAnchor > code) {
+        throw new Error(`Unordered error anchor in ${docPath}:${lineNumber}`, { cause: `${previousAnchor} ≤ ${code}` });
+      }
+      previousAnchor = code;
+      return;
+    }
+
+    const codeMatch = codePattern.exec(line);
+    if (codeMatch == null) return;
+
+    const code = codeMatch[1];
+    if (previousAnchor == null) {
+      throw new Error(`Missing error anchor in ${docPath}:${lineNumber}`, { cause: code });
+    }
+    assert.strictEqual(code, previousAnchor, `Error anchor do not match with error code in ${docPath}:${lineNumber}`);
+
+    if (legacy && errors.has(code)) {
+      throw new Error(`Error is documented both as legacy and non-legacy in ${docPath}:${lineNumber}`, { cause: code });
+    }
+    (legacy ? legacyErrors : errors).add(code);
+  }
+
+  let lineNumber = 0;
+  for (const line of lines) {
+    lineNumber++;
+    if (line.startsWith('## ')) currentHeader = line.substring(3);
+    if (currentHeader === 'Node.js error codes') parse(line, false, lineNumber);
+    if (line === '## Legacy Node.js error codes') previousAnchor = null;
+    if (currentHeader === 'Legacy Node.js error codes') parse(line, true, lineNumber);
+  }
+
+  return { errors, legacyErrors };
+}",40
+next-tick-breadth-args::main,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/benchmark/process/next-tick-breadth-args.js,main,"function main({ n }) {
+  let j = 0;
+
+  function cb1(arg1) {
+    j++;
+    if (j === n)
+      bench.end(n);
+  }
+
+  function cb2(arg1, arg2) {
+    j++;
+    if (j === n)
+      bench.end(n);
+  }
+
+  function cb3(arg1, arg2, arg3) {
+    j++;
+    if (j === n)
+      bench.end(n);
+  }
+
+  function cb4(arg1, arg2, arg3, arg4) {
+    j++;
+    if (j === n)
+      bench.end(n);
   }
 
   bench.start();
-  for (let i = 0; i < n; ++i) {
-    fn(actual, expected);
+  for (let i = 0; i < n; i++) {
+    if (i % 4 === 0)
+      process.nextTick(cb4, 3.14, 1024, true, false);
+    else if (i % 3 === 0)
+      process.nextTick(cb3, 512, true, null);
+    else if (i % 2 === 0)
+      process.nextTick(cb2, false, 5.1);
+    else
+      process.nextTick(cb1, 0);
   }
-  bench.end(n);
-}",30
-v8_mock::anonymous,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/deps/v8/tools/clusterfuzz/foozzie/v8_mock.js,anonymous,"function() {
-  let index = 0;
-  let mockDate = 1477662728696;
-  const mockDateNow = function() {
-    index = (index + 1) % 10;
-    mockDate = mockDate + index + 1;
-    return mockDate;
-  }
+}",34
+index::validate,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/deps/npm/node_modules/aproba/index.js,validate,"function validate (rawSchemas, args) {
+  if (arguments.length !== 2) throw wrongNumberOfArgs(['SA'], arguments.length)
+  if (!rawSchemas) throw missingRequiredArg(0, 'rawSchemas')
+  if (!args) throw missingRequiredArg(1, 'args')
+  if (!types.S.check(rawSchemas)) throw invalidType(0, ['string'], rawSchemas)
+  if (!types.A.check(args)) throw invalidType(1, ['array'], args)
+  const schemas = rawSchemas.split('|')
+  const arity = {}
 
-  const origDate = Date;
-  const construct = Reflect.construct;
-  const constructDate = function(args) {
-    let result;
-    if (args.length) {
-      result = construct(origDate, args);
-    } else {
-      result = new origDate(mockDateNow());
+  schemas.forEach(schema => {
+    for (let ii = 0; ii < schema.length; ++ii) {
+      const type = schema[ii]
+      if (!types[type]) throw unknownType(ii, type)
     }
-    result.constructor = function(...args) { return constructDate(args); }
-    Object.defineProperty(
-        result, ""constructor"", { configurable: false, writable: false });
-    return result;
+    if (/E.*E/.test(schema)) throw moreThanOneError(schema)
+    addSchema(schema, arity)
+    if (/E/.test(schema)) {
+      addSchema(schema.replace(/E.*$/, 'E'), arity)
+      addSchema(schema.replace(/E/, 'Z'), arity)
+      if (schema.length === 1) addSchema('', arity)
+    }
+  })
+  let matching = arity[args.length]
+  if (!matching) {
+    throw wrongNumberOfArgs(Object.keys(arity), args.length)
+  }
+  for (let ii = 0; ii < args.length; ++ii) {
+    let newMatching = matching.filter(schema => {
+      const type = schema[ii]
+      const typeCheck = types[type].check
+      return typeCheck(args[ii])
+    })
+    if (!newMatching.length) {
+      const labels = matching.map(_ => types[_[ii]].label).filter(_ => _ != null)
+      throw invalidType(ii, labels, args[ii])
+    }
+    matching = newMatching
+  }
+}",38
+npa::fromFile,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/deps/npm/node_modules/npm-package-arg/lib/npa.js,fromFile,"function fromFile (res, where) {
+  res.type = isFileType.test(res.rawSpec) ? 'file' : 'directory'
+  res.where = where
+
+  let rawSpec = pathToFileURL(res.rawSpec)
+
+  if (rawSpec.startsWith('file:/')) {
+    // XXX backwards compatibility lack of compliance with RFC 8089
+
+    // turn file://path into file:/path
+    if (/^file:\/\/[^/]/.test(rawSpec)) {
+      rawSpec = `file:/${rawSpec.slice(5)}`
+    }
+
+    // turn file:/../path into file:../path
+    // for 1 or 3 leading slashes (2 is already ruled out from handling file:// explicitly above)
+    if (/^\/{1,3}\.\.?(\/|$)/.test(rawSpec.slice(5))) {
+      rawSpec = rawSpec.replace(/^file:\/{1,3}/, 'file:')
+    }
   }
 
-  origDate.prototype.constructor = function(...args) {
-    return constructDate(args);
+  let resolvedUrl
+  let specUrl
+  try {
+    // always put the '/' on ""where"", or else file:foo from /path/to/bar goes to /path/to/foo, when we want it to be /path/to/bar/foo
+    resolvedUrl = new URL(rawSpec, `${pathToFileURL(path.resolve(where))}/`)
+    specUrl = new URL(rawSpec)
+  } catch (originalError) {
+    const er = new Error('Invalid file: URL, must comply with RFC 8089')
+    throw Object.assign(er, {
+      raw: res.rawSpec,
+      spec: res,
+      where,
+      originalError,
+    })
+  }
+
+  // turn /C:/blah into just C:/blah on windows
+  let specPath = decodeURIComponent(specUrl.pathname)
+  let resolvedPath = decodeURIComponent(resolvedUrl.pathname)
+  if (isWindows) {
+    specPath = specPath.replace(/^\/+([a-z]:\/)/i, '$1')
+    resolvedPath = resolvedPath.replace(/^\/+([a-z]:\/)/i, '$1')
+  }
+
+  // replace ~ with homedir, but keep the ~ in the saveSpec
+  // otherwise, make it relative to where param
+  if (/^\/~(\/|$)/.test(specPath)) {
+    res.saveSpec = `file:${specPath.substr(1)}`
+    resolvedPath = path.resolve(homedir(), specPath.substr(3))
+  } else if (!path.isAbsolute(rawSpec.slice(5))) {
+    res.saveSpec = `file:${path.relative(where, resolvedPath)}`
+  } else {
+    res.saveSpec = `file:${path.resolve(resolvedPath)}`
+  }
+
+  res.fetchSpec = path.resolve(where, resolvedPath)
+  // re-normalize the slashes in saveSpec due to node:path/win32 behavior in windows
+  res.saveSpec = res.saveSpec.split('\\').join('/')
+  // Ignoring because this only happens in windows
+  /* istanbul ignore next */
+  if (res.saveSpec.startsWith('file://')) {
+    // normalization of \\win32\root paths can cause a double / which we don't want
+    res.saveSpec = `file:/${res.saveSpec.slice(7)}`
+  }
+  return res
+}",47
+lexer::tryParseRequire,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/deps/cjs-module-lexer/lexer.js,tryParseRequire,"function tryParseRequire (requireType) {
+  // require('...')
+  const revertPos = pos;
+  if (source.startsWith('equire', pos + 1)) {
+    pos += 7;
+    let ch = commentWhitespace();
+    if (ch === 40/*(*/) {
+      pos++;
+      ch = commentWhitespace();
+      const reexportStart = pos;
+      if (ch === 39/*'*/ || ch === 34/*""*/) {
+        stringLiteral(ch);
+        const reexportEnd = ++pos;
+        ch = commentWhitespace();
+        if (ch === 41/*)*/) {
+          switch (requireType) {
+            case ExportAssign:
+              reexports.add(decode(source.slice(reexportStart, reexportEnd)));
+              return true;
+            case ExportStar:
+              reexports.add(decode(source.slice(reexportStart, reexportEnd)));
+              return true;
+            default:
+              lastStarExportSpecifier = decode(source.slice(reexportStart, reexportEnd));
+              return true;
+          }
+        }
+      }
+    }
+    pos = revertPos;
+  }
+  return false;
+}",35
+index::searchStream,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/deps/npm/node_modules/libnpmsearch/lib/index.js,searchStream,"function searchStream (query, opts = {}) {
+  opts = {
+    detailed: false,
+    limit: 20,
+    from: 0,
+    quality: 0.65,
+    popularity: 0.98,
+    maintenance: 0.5,
+    ...opts.opts, // this is to support the cli's --searchopts parameter
+    ...opts,
+  }
+
+  switch (opts.sortBy) {
+    case 'optimal': {
+      opts.quality = 0.65
+      opts.popularity = 0.98
+      opts.maintenance = 0.5
+      break
+    }
+    case 'quality': {
+      opts.quality = 1
+      opts.popularity = 0
+      opts.maintenance = 0
+      break
+    }
+    case 'popularity': {
+      opts.quality = 0
+      opts.popularity = 1
+      opts.maintenance = 0
+      break
+    }
+    case 'maintenance': {
+      opts.quality = 0
+      opts.popularity = 0
+      opts.maintenance = 1
+      break
+    }
+  }
+  return npmFetch.json.stream('/-/v1/search', 'objects.*',
+    {
+      ...opts,
+      query: {
+        text: Array.isArray(query) ? query.join(' ') : query,
+        size: opts.limit,
+        from: opts.from,
+        quality: opts.quality,
+        popularity: opts.popularity,
+        maintenance: opts.maintenance,
+      },
+      mapJSON: (obj) => {
+        if (obj.package.date) {
+          obj.package.date = new Date(obj.package.date)
+        }
+        if (opts.detailed) {
+          return obj
+        } else {
+          return obj.package
+        }
+      },
+    }
+  )
+}",61
+wrappers::wrapWithTopLevelDefinitions,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/react/scripts/rollup/wrappers.js,wrapWithTopLevelDefinitions,"function wrapWithTopLevelDefinitions(
+  source,
+  bundleType,
+  globalName,
+  filename,
+  moduleType,
+  wrapWithModuleBoundaries
+) {
+  if (wrapWithModuleBoundaries) {
+    switch (bundleType) {
+      case NODE_DEV:
+      case NODE_PROFILING:
+      case FB_WWW_DEV:
+      case FB_WWW_PROFILING:
+      case RN_OSS_DEV:
+      case RN_OSS_PROFILING:
+      case RN_FB_DEV:
+      case RN_FB_PROFILING:
+        // Remove the 'use strict' directive from source.
+        // The module start wrapper will add its own.
+        // This directive is only meaningful when it is the first statement in a file or function.
+        source = source.replace(USE_STRICT_HEADER_REGEX, '');
+
+        // Certain DEV and Profiling bundles should self-register their own module boundaries with DevTools.
+        // This allows the Timeline to de-emphasize (dim) internal stack frames.
+        source = wrapWithRegisterInternalModule(source);
+        break;
+    }
+  }
+
+  if (bundleType === BROWSER_SCRIPT) {
+    // Bundles of type BROWSER_SCRIPT get sent straight to the browser without
+    // additional processing. So we should exclude any extra wrapper comments.
+    return source;
+  }
+
+  if (moduleType === RECONCILER) {
+    // Standalone reconciler is only used by third-party renderers.
+    // It is handled separately.
+    const wrapper = reconcilerWrappers[bundleType];
+    if (typeof wrapper !== 'function') {
+      throw new Error(
+        `Unsupported build type for the reconciler package: ${bundleType}.`
+      );
+    }
+
+    return wrapper(source, globalName, filename, moduleType);
+  }
+
+  // All the other packages.
+  const wrapper = topLevelDefinitionWrappers[bundleType];
+  if (typeof wrapper !== 'function') {
+    throw new Error(`Unsupported build type: ${bundleType}.`);
+  }
+
+  return wrapper(source, globalName, filename, moduleType);
+}",41
+util::isValidSubprotocol,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/deps/undici/src/lib/web/websocket/util.js,isValidSubprotocol,"function isValidSubprotocol (protocol) {
+  // If present, this value indicates one
+  // or more comma-separated subprotocol the client wishes to speak,
+  // ordered by preference.  The elements that comprise this value
+  // MUST be non-empty strings with characters in the range U+0021 to
+  // U+007E not including separator characters as defined in
+  // [RFC2616] and MUST all be unique strings.
+  if (protocol.length === 0) {
+    return false
+  }
+
+  for (let i = 0; i < protocol.length; ++i) {
+    const code = protocol.charCodeAt(i)
+
+    if (
+      code < 0x21 || // CTL, contains SP (0x20) and HT (0x09)
+      code > 0x7E ||
+      code === 0x22 || // ""
+      code === 0x28 || // (
+      code === 0x29 || // )
+      code === 0x2C || // ,
+      code === 0x2F || // /
+      code === 0x3A || // :
+      code === 0x3B || // ;
+      code === 0x3C || // <
+      code === 0x3D || // =
+      code === 0x3E || // >
+      code === 0x3F || // ?
+      code === 0x40 || // @
+      code === 0x5B || // [
+      code === 0x5C || // \
+      code === 0x5D || // ]
+      code === 0x7B || // {
+      code === 0x7D // }
+    ) {
+      return false
+    }
+  }
+
+  return true
+}",32
+date::parseImfDate,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/deps/undici/src/lib/util/date.js,parseImfDate,"function parseImfDate (date) {
+  if (date.length !== 29) {
+    return undefined
+  }
+
+  if (!date.endsWith('gmt')) {
+    // Unsupported timezone
+    return undefined
+  }
+
+  for (const spaceInx of IMF_SPACES) {
+    if (date[spaceInx] !== ' ') {
+      return undefined
+    }
+  }
+
+  for (const colonIdx of IMF_COLONS) {
+    if (date[colonIdx] !== ':') {
+      return undefined
+    }
+  }
+
+  const dayName = date.substring(0, 3)
+  if (!IMF_DAYS.includes(dayName)) {
+    return undefined
+  }
+
+  const dayString = date.substring(5, 7)
+  const day = Number.parseInt(dayString)
+  if (isNaN(day) || (day < 10 && dayString[0] !== '0')) {
+    // Not a number, 0, or it's less than 10 and didn't start with a 0
+    return undefined
+  }
+
+  const month = date.substring(8, 11)
+  const monthIdx = IMF_MONTHS.indexOf(month)
+  if (monthIdx === -1) {
+    return undefined
+  }
+
+  const year = Number.parseInt(date.substring(12, 16))
+  if (isNaN(year)) {
+    return undefined
+  }
+
+  const hourString = date.substring(17, 19)
+  const hour = Number.parseInt(hourString)
+  if (isNaN(hour) || (hour < 10 && hourString[0] !== '0')) {
+    return undefined
+  }
+
+  const minuteString = date.substring(20, 22)
+  const minute = Number.parseInt(minuteString)
+  if (isNaN(minute) || (minute < 10 && minuteString[0] !== '0')) {
+    return undefined
+  }
+
+  const secondString = date.substring(23, 25)
+  const second = Number.parseInt(secondString)
+  if (isNaN(second) || (second < 10 && secondString[0] !== '0')) {
+    return undefined
+  }
+
+  return new Date(Date.UTC(year, monthIdx, day, hour, minute, second))
+}",52
+zlib::Zlib,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/lib/zlib.js,Zlib,"function Zlib(opts, mode) {
+  let windowBits = Z_DEFAULT_WINDOWBITS;
+  let level = Z_DEFAULT_COMPRESSION;
+  let memLevel = Z_DEFAULT_MEMLEVEL;
+  let strategy = Z_DEFAULT_STRATEGY;
+  let dictionary;
+
+  if (opts) {
+    // windowBits is special. On the compression side, 0 is an invalid value.
+    // But on the decompression side, a value of 0 for windowBits tells zlib
+    // to use the window size in the zlib header of the compressed stream.
+    if ((opts.windowBits == null || opts.windowBits === 0) &&
+        (mode === INFLATE ||
+         mode === GUNZIP ||
+         mode === UNZIP)) {
+      windowBits = 0;
+    } else {
+      // `{ windowBits: 8 }` is valid for deflate but not gzip.
+      const min = Z_MIN_WINDOWBITS + (mode === GZIP ? 1 : 0);
+      windowBits = checkRangesOrGetDefault(
+        opts.windowBits, 'options.windowBits',
+        min, Z_MAX_WINDOWBITS, Z_DEFAULT_WINDOWBITS);
+    }
+
+    level = checkRangesOrGetDefault(
+      opts.level, 'options.level',
+      Z_MIN_LEVEL, Z_MAX_LEVEL, Z_DEFAULT_COMPRESSION);
+
+    memLevel = checkRangesOrGetDefault(
+      opts.memLevel, 'options.memLevel',
+      Z_MIN_MEMLEVEL, Z_MAX_MEMLEVEL, Z_DEFAULT_MEMLEVEL);
+
+    strategy = checkRangesOrGetDefault(
+      opts.strategy, 'options.strategy',
+      Z_DEFAULT_STRATEGY, Z_FIXED, Z_DEFAULT_STRATEGY);
+
+    dictionary = opts.dictionary;
+    if (dictionary !== undefined && !isArrayBufferView(dictionary)) {
+      if (isAnyArrayBuffer(dictionary)) {
+        dictionary = Buffer.from(dictionary);
+      } else {
+        throw new ERR_INVALID_ARG_TYPE(
+          'options.dictionary',
+          ['Buffer', 'TypedArray', 'DataView', 'ArrayBuffer'],
+          dictionary,
+        );
+      }
+    }
+  }
+
+  const handle = new binding.Zlib(mode);
+  // Ideally, we could let ZlibBase() set up _writeState. I haven't been able
+  // to come up with a good solution that doesn't break our internal API,
+  // and with it all supported npm versions at the time of writing.
+  this._writeState = new Uint32Array(2);
+  handle.init(windowBits,
+              level,
+              memLevel,
+              strategy,
+              this._writeState,
+              processCallback,
+              dictionary);
+
+  ReflectApply(ZlibBase, this, [opts, mode, handle, zlibDefaultOpts]);
+
+  this._level = level;
+  this._strategy = strategy;
+  this._mode = mode;
+}",54
+cp::getStatsForCopy,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/lib/internal/fs/cp/cp.js,getStatsForCopy,"async function getStatsForCopy(destStat, src, dest, opts) {
+  const statFn = opts.dereference ? stat : lstat;
+  const srcStat = await statFn(src);
+  if (srcStat.isDirectory() && opts.recursive) {
+    return onDir(srcStat, destStat, src, dest, opts);
+  } else if (srcStat.isDirectory()) {
+    throw new ERR_FS_EISDIR({
+      message: `${src} is a directory (not copied)`,
+      path: src,
+      syscall: 'cp',
+      errno: EISDIR,
+      code: 'EISDIR',
+    });
+  } else if (srcStat.isFile() ||
+            srcStat.isCharacterDevice() ||
+            srcStat.isBlockDevice()) {
+    return onFile(srcStat, destStat, src, dest, opts);
+  } else if (srcStat.isSymbolicLink()) {
+    return onLink(destStat, src, dest, opts);
+  } else if (srcStat.isSocket()) {
+    throw new ERR_FS_CP_SOCKET({
+      message: `cannot copy a socket file: ${dest}`,
+      path: dest,
+      syscall: 'cp',
+      errno: EINVAL,
+      code: 'EINVAL',
+    });
+  } else if (srcStat.isFIFO()) {
+    throw new ERR_FS_CP_FIFO_PIPE({
+      message: `cannot copy a FIFO pipe: ${dest}`,
+      path: dest,
+      syscall: 'cp',
+      errno: EINVAL,
+      code: 'EINVAL',
+    });
+  }
+  throw new ERR_FS_CP_UNKNOWN({
+    message: `cannot copy an unknown file type: ${dest}`,
+    path: dest,
+    syscall: 'cp',
+    errno: EINVAL,
+    code: 'EINVAL',
+  });
+}",44
+bench-linkSync::main,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/benchmark/fs/bench-linkSync.js,main,"function main({ n, type }) {
+  switch (type) {
+    case 'valid': {
+      bench.start();
+      for (let i = 0; i < n; i++) {
+        fs.linkSync(tmpfile, tmpdir.resolve(`.valid-${i}`), 'file');
+      }
+      bench.end(n);
+
+      break;
+    }
+
+    case 'invalid': {
+      let hasError = false;
+      bench.start();
+      for (let i = 0; i < n; i++) {
+        try {
+          fs.linkSync(
+            tmpdir.resolve(`.non-existing-file-for-linkSync-${i}`),
+            __filename,
+            'file',
+          );
+        } catch {
+          hasError = true;
+        }
+      }
+      bench.end(n);
+      assert.ok(hasError);
+      break;
+    }
+    default:
+      new Error('Invalid type');
+  }
+}",32
+bind-params::main,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/benchmark/dgram/bind-params.js,main,"function main({ n, port, address }) {
+  port = port === 'true' ? 0 : undefined;
+  address = address === 'true' ? '0.0.0.0' : undefined;
+
+  if (port !== undefined && address !== undefined) {
+    bench.start();
+    for (let i = 0; i < n; i++) {
+      dgram.createSocket('udp4').bind(port, address)
+        .on('error', noop)
+        .unref();
+    }
+    bench.end(n);
+  } else if (port !== undefined) {
+    bench.start();
+    for (let i = 0; i < n; i++) {
+      dgram.createSocket('udp4')
+        .bind(port)
+        .on('error', noop)
+        .unref();
+    }
+    bench.end(n);
+  } else if (port === undefined && address === undefined) {
+    bench.start();
+    for (let i = 0; i < n; i++) {
+      dgram.createSocket('udp4')
+        .bind()
+        .on('error', noop)
+        .unref();
+    }
+    bench.end(n);
+  }
+}",31
+myers_diff::backtrack,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/lib/internal/assert/myers_diff.js,backtrack,"function backtrack(trace, actual, expected, checkCommaDisparity) {
+  const actualLength = actual.length;
+  const expectedLength = expected.length;
+  const max = actualLength + expectedLength;
+
+  let x = actualLength;
+  let y = expectedLength;
+  const result = [];
+
+  for (let diffLevel = trace.length - 1; diffLevel >= 0; diffLevel--) {
+    const v = trace[diffLevel];
+    const diagonalIndex = x - y;
+    const offset = diagonalIndex + max;
+
+    let prevDiagonalIndex;
+    if (
+      diagonalIndex === -diffLevel ||
+      (diagonalIndex !== diffLevel && v[offset - 1] < v[offset + 1])
+    ) {
+      prevDiagonalIndex = diagonalIndex + 1;
+    } else {
+      prevDiagonalIndex = diagonalIndex - 1;
+    }
+
+    const prevX = v[prevDiagonalIndex + max];
+    const prevY = prevX - prevDiagonalIndex;
+
+    while (x > prevX && y > prevY) {
+      const actualItem = actual[x - 1];
+      const value = checkCommaDisparity && !StringPrototypeEndsWith(actualItem, ',') ? expected[y - 1] : actualItem;
+      ArrayPrototypePush(result, [ kOperations.NOP, value ]);
+      x--;
+      y--;
+    }
+
+    if (diffLevel > 0) {
+      if (x > prevX) {
+        ArrayPrototypePush(result, [ kOperations.INSERT, actual[--x] ]);
+      } else {
+        ArrayPrototypePush(result, [ kOperations.DELETE, expected[--y] ]);
+      }
+    }
+  }
+
+  return result;
+}",39
+vm::compileFunction,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/lib/vm.js,compileFunction,"function compileFunction(code, params, options = kEmptyObject) {
+  validateString(code, 'code');
+  validateObject(options, 'options');
+  if (params !== undefined) {
+    validateStringArray(params, 'params');
+  }
+  const {
+    filename = '',
+    columnOffset = 0,
+    lineOffset = 0,
+    cachedData = undefined,
+    produceCachedData = false,
+    parsingContext = undefined,
+    contextExtensions = [],
+    importModuleDynamically,
+  } = options;
+
+  validateString(filename, 'options.filename');
+  validateInt32(columnOffset, 'options.columnOffset');
+  validateInt32(lineOffset, 'options.lineOffset');
+  if (cachedData !== undefined)
+    validateBuffer(cachedData, 'options.cachedData');
+  validateBoolean(produceCachedData, 'options.produceCachedData');
+  if (parsingContext !== undefined) {
+    if (
+      typeof parsingContext !== 'object' ||
+      parsingContext === null ||
+      !isContext(parsingContext)
+    ) {
+      throw new ERR_INVALID_ARG_TYPE(
+        'options.parsingContext',
+        'Context',
+        parsingContext,
+      );
+    }
+  }
+  validateArray(contextExtensions, 'options.contextExtensions');
+  ArrayPrototypeForEach(contextExtensions, (extension, i) => {
+    const name = `options.contextExtensions[${i}]`;
+    validateObject(extension, name, kValidateObjectAllowNullable);
+  });
+
+  const hostDefinedOptionId =
+      getHostDefinedOptionId(importModuleDynamically, filename);
+
+  return internalCompileFunction(
+    code, filename, lineOffset, columnOffset,
+    cachedData, produceCachedData, parsingContext, contextExtensions,
+    params, hostDefinedOptionId, importModuleDynamically,
+  ).function;
+}",48
+adapters::newReadableStreamFromStreamBase,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/lib/internal/webstreams/adapters.js,newReadableStreamFromStreamBase,"function newReadableStreamFromStreamBase(streamBase, strategy, options = kEmptyObject) {
+  validateObject(streamBase, 'streamBase');
+  validateObject(options, 'options');
+
+  const {
+    ondone = () => {},
+  } = options;
+
+  if (typeof streamBase.onread === 'function')
+    throw new ERR_INVALID_STATE('StreamBase already has a consumer');
+
+  validateFunction(ondone, 'options.ondone');
+
+  let controller;
+
+  streamBase.onread = (arrayBuffer) => {
+    const nread = streamBaseState[kReadBytesOrError];
+
+    if (nread === 0)
+      return;
+
+    try {
+      if (nread === UV_EOF) {
+        controller.close();
+        streamBase.readStop();
+        try {
+          ondone();
+        } catch (error) {
+          controller.error(error);
+        }
+        return;
+      }
+
+      controller.enqueue(arrayBuffer);
+
+      if (controller.desiredSize <= 0)
+        streamBase.readStop();
+    } catch (error) {
+      controller.error(error);
+      streamBase.readStop();
+    }
   };
 
-  var handler = {
-    apply: function(target, thisArg, args) {
-      return constructDate(args);
+  return new ReadableStream({
+    start(c) { controller = c; },
+
+    pull() {
+      streamBase.readStart();
     },
-    construct: function(target, args, newTarget) {
-      return constructDate(args);
+
+    cancel() {
+      const promise = PromiseWithResolvers();
+      try {
+        ondone();
+      } catch (error) {
+        promise.reject(error);
+        return promise.promise;
+      }
+      const req = new ShutdownWrap();
+      req.oncomplete = () => promise.resolve();
+      const err = streamBase.shutdown(req);
+      if (err === 1)
+        promise.resolve();
+      return promise.promise;
     },
-    get: function(target, property, receiver) {
-      if (property == ""now"") {
-        return mockDateNow;
-      }
-      if (property == ""prototype"") {
-        return origDate.prototype;
-      }
-    },
-  }
-
-  Date = new Proxy(Date, handler);
-}",43
-inspect_repl::customInspectSymbol,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/lib/internal/debugger/inspect_repl.js,customInspectSymbol,"(depth, options) {
-      const { scriptId, lineNumber, columnNumber, delta, scriptSource } = this;
-      const start = MathMax(1, lineNumber - delta + 1);
-      const end = lineNumber + delta + 1;
-
-      const lines = StringPrototypeSplit(scriptSource, '\n');
-      return ArrayPrototypeJoin(
-        ArrayPrototypeMap(
-          ArrayPrototypeSlice(lines, start - 1, end),
-          (lineText, offset) => {
-            const i = start + offset;
-            const isCurrent = i === (lineNumber + 1);
-
-            const markedLine = isCurrent ?
-              markSourceColumn(lineText, columnNumber, options.colors) :
-              lineText;
-
-            let isBreakpoint = false;
-            ArrayPrototypeForEach(knownBreakpoints, ({ location }) => {
-              if (!location) return;
-              if (scriptId === location.scriptId &&
-              i === (location.lineNumber + 1)) {
-                isBreakpoint = true;
-              }
-            });
-
-            let prefixChar = ' ';
-            if (isCurrent) {
-              prefixChar = '>';
-            } else if (isBreakpoint) {
-              prefixChar = '*';
-            }
-            return `${leftPad(i, prefixChar, end)} ${markedLine}`;
-          }), '\n');
-    }",31
-pre_execution::initializeDeprecations,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/lib/internal/process/pre_execution.js,initializeDeprecations,"function initializeDeprecations() {
-  const pendingDeprecation = getOptionValue('--pending-deprecation');
-
-  // DEP0103: access to `process.binding('util').isX` type checkers
-  // TODO(addaleax): Turn into a full runtime deprecation.
-  const utilBinding = internalBinding('util');
-  const types = require('internal/util/types');
-  for (const name of [
-    'isArrayBuffer',
-    'isArrayBufferView',
-    'isAsyncFunction',
-    'isDataView',
-    'isDate',
-    'isExternal',
-    'isMap',
-    'isMapIterator',
-    'isNativeError',
-    'isPromise',
-    'isRegExp',
-    'isSet',
-    'isSetIterator',
-    'isTypedArray',
-    'isUint8Array',
-    'isAnyArrayBuffer',
-  ]) {
-    utilBinding[name] = pendingDeprecation ?
-      deprecate(types[name],
-                'Accessing native typechecking bindings of Node ' +
-                'directly is deprecated. ' +
-                `Please use \`util.types.${name}\` instead.`,
-                'DEP0103') :
-      types[name];
-  }
-
-  // TODO(joyeecheung): this is a legacy property exposed to process.
-  // Now that we use the config binding to carry this information, remove
-  // it from the process. We may consider exposing it properly in
-  // process.features.
-  const { noBrowserGlobals } = internalBinding('config');
-  if (noBrowserGlobals) {
-    ObjectDefineProperty(process, '_noBrowserGlobals', {
-      __proto__: null,
-      writable: false,
-      enumerable: true,
-      configurable: true,
-      value: noBrowserGlobals,
-    });
-  }
-
-  if (pendingDeprecation) {
-    process.binding = deprecate(process.binding,
-                                'process.binding() is deprecated. ' +
-                                'Please use public APIs instead.', 'DEP0111');
-
-    process._tickCallback = deprecate(process._tickCallback,
-                                      'process._tickCallback() is deprecated',
-                                      'DEP0134');
-  }
-}",49
-sprintf::sprintf_parse,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/deps/npm/node_modules/sprintf-js/src/sprintf.js,sprintf_parse,"function sprintf_parse(fmt) {
-        if (sprintf_cache[fmt]) {
-            return sprintf_cache[fmt]
-        }
-
-        var _fmt = fmt, match, parse_tree = [], arg_names = 0
-        while (_fmt) {
-            if ((match = re.text.exec(_fmt)) !== null) {
-                parse_tree.push(match[0])
-            }
-            else if ((match = re.modulo.exec(_fmt)) !== null) {
-                parse_tree.push('%')
-            }
-            else if ((match = re.placeholder.exec(_fmt)) !== null) {
-                if (match[2]) {
-                    arg_names |= 1
-                    var field_list = [], replacement_field = match[2], field_match = []
-                    if ((field_match = re.key.exec(replacement_field)) !== null) {
-                        field_list.push(field_match[1])
-                        while ((replacement_field = replacement_field.substring(field_match[0].length)) !== '') {
-                            if ((field_match = re.key_access.exec(replacement_field)) !== null) {
-                                field_list.push(field_match[1])
-                            }
-                            else if ((field_match = re.index_access.exec(replacement_field)) !== null) {
-                                field_list.push(field_match[1])
-                            }
-                            else {
-                                throw new SyntaxError('[sprintf] failed to parse named argument key')
-                            }
-                        }
-                    }
-                    else {
-                        throw new SyntaxError('[sprintf] failed to parse named argument key')
-                    }
-                    match[2] = field_list
-                }
-                else {
-                    arg_names |= 2
-                }
-                if (arg_names === 3) {
-                    throw new Error('[sprintf] mixing positional and named placeholders is not (yet) supported')
-                }
-
-                parse_tree.push(
-                    {
-                        placeholder: match[0],
-                        param_no:    match[1],
-                        keys:        match[2],
-                        sign:        match[3],
-                        pad_char:    match[4],
-                        align:       match[5],
-                        width:       match[6],
-                        precision:   match[7],
-                        type:        match[8]
-                    }
-                )
-            }
-            else {
-                throw new SyntaxError('[sprintf] unexpected placeholder')
-            }
-            _fmt = _fmt.substring(match[0].length)
-        }
-        return sprintf_cache[fmt] = parse_tree
-    }",62
-v8_foozzie_harness_adjust::anonymous,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/deps/v8/tools/clusterfuzz/foozzie/v8_foozzie_harness_adjust.js,anonymous,"function() {
-    // Same as in mjsunit.js.
-    function classOf(object) {
-      // Argument must not be null or undefined.
-      var string = Object.prototype.toString.call(object);
-      // String has format [object <ClassName>].
-      return string.substring(8, string.length - 1);
-    }
-
-    // Override prettyPrinted with a version that also recusively prints object
-    // properties (with a depth of 3).
-    let origPrettyPrinted = prettyPrinted;
-    prettyPrinted = function prettyPrinted(value, depth=3) {
-      if (depth == 0) {
-        return ""..."";
-      }
-      switch (typeof value) {
-        case ""object"":
-          if (value === null) return ""null"";
-          var objectClass = classOf(value);
-          switch (objectClass) {
-            case ""Object"":
-              var name = value.constructor.name;
-              if (!name)
-                name = ""Object"";
-              return name + ""{"" + Object.keys(value).map(function(key, index) {
-                return (
-                    prettyPrinted(key, depth - 1) +
-                    "": "" +
-                    prettyPrinted(value[key], depth - 1)
-                );
-              }).join("","")  + ""}"";
-          }
-      }
-      // Fall through to original version for all other types.
-      return origPrettyPrinted(value);
-    }
-
-    // We're not interested in stack traces.
-    MjsUnitAssertionError = function MjsUnitAssertionError(message) {}
-    MjsUnitAssertionError.prototype.toString = function () { return """"; };
-
-    // Do more printing in assertions for more correctness coverage.
-    failWithMessage = function failWithMessage(message) {
-      print(prettyPrinted(message))
-    }
-
-    assertSame = function assertSame(expected, found, name_opt) {
-      print(prettyPrinted(found));
-    }
-
-    assertNotSame = function assertNotSame(expected, found, name_opt) {
-      print(prettyPrinted(found));
-    }
-
-    assertEquals = function assertEquals(expected, found, name_opt) {
-      print(prettyPrinted(found));
-    }
-
-    assertNotEquals = function assertNotEquals(expected, found, name_opt) {
-      print(prettyPrinted(found));
-    }
-
-    assertNull = function assertNull(value, name_opt) {
-      print(prettyPrinted(value));
-    }
-
-    assertNotNull = function assertNotNull(value, name_opt) {
-      print(prettyPrinted(value));
-    }
-
-    // Suppress optimization status as it leads to false positives.
-    assertUnoptimized = function assertUnoptimized() {}
-
-    assertOptimized = function assertOptimized() {}
-
-    isNeverOptimize = function isNeverOptimize() {}
-
-    isAlwaysOptimize = function isAlwaysOptimize() {}
-
-    isInterpreted = function isInterpreted() {}
-
-    isBaseline = function isBaseline() {}
-
-    isUnoptimized = function isUnoptimized() {}
-
-    isOptimized = function isOptimized() {}
-
-    isTurboFanned = function isTurboFanned() {}
-  }",63
-react-jsx-runtime.development::jsxDEV,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/react/fixtures/legacy-jsx-runtimes/react-14/cjs/react-jsx-runtime.development.js,jsxDEV,"function jsxDEV(type, config, maybeKey, source, self) {
-  {
-    var propName; // Reserved names are extracted
-
-    var props = {};
-    var key = null;
-    var ref = null; // Currently, key can be spread in as a prop. This causes a potential
-    // issue if key is also explicitly declared (ie. <div {...props} key=""Hi"" />
-    // or <div key=""Hi"" {...props} /> ). We want to deprecate key spread,
-    // but as an intermediary step, we will use jsxDEV for everything except
-    // <div {...props} key=""Hi"" />, because we aren't currently able to tell if
-    // key is explicitly declared to be undefined or not.
-
-    if (maybeKey !== undefined) {
-      key = '' + maybeKey;
-    }
-
-    if (hasValidKey(config)) {
-      key = '' + config.key;
-    }
-
-    if (hasValidRef(config)) {
-      ref = config.ref;
-    } // Remaining properties are added to a new props object
-
-
-    for (propName in config) {
-      if (hasOwnProperty.call(config, propName) && !RESERVED_PROPS.hasOwnProperty(propName)) {
-        props[propName] = config[propName];
-      }
-    } // Resolve default props
-
-
-    if (type && type.defaultProps) {
-      var defaultProps = type.defaultProps;
-
-      for (propName in defaultProps) {
-        if (props[propName] === undefined) {
-          props[propName] = defaultProps[propName];
-        }
-      }
-    }
-
-    if (key || ref) {
-      var displayName = typeof type === 'function' ? type.displayName || type.name || 'Unknown' : type;
-
-      if (key) {
-        defineKeyPropWarningGetter(props, displayName);
-      }
-
-      if (ref) {
-        defineRefPropWarningGetter(props, displayName);
-      }
-    }
-
-    return ReactElement(type, key, ref, self, source, ReactCurrentOwner.current, props);
-  }
-}",40
-benchmark::anonymous,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/react/scripts/bench/benchmarks/pe-functional-components/benchmark.js,anonymous,"function (props) {
-    if (props.x === 319) {
-      return React.createElement(
-        'div',
-        {style: {height: 40, left: 0}, className: '_3pzk'},
-        React.createElement(FixedDataTableCellGroupImpl144, {x: 318})
-      );
-    }
-    if (props.x === 333) {
-      return React.createElement(
-        'div',
-        {style: {height: 40, left: 721}, className: '_3pzk'},
-        React.createElement(FixedDataTableCellGroupImpl144, {x: 332})
-      );
-    }
-    if (props.x === 368) {
-      return React.createElement(
-        'div',
-        {style: {height: 25, left: 0}, className: '_3pzk'},
-        React.createElement(FixedDataTableCellGroupImpl144, {x: 367})
-      );
-    }
-    if (props.x === 456) {
-      return React.createElement(
-        'div',
-        {style: {height: 25, left: 721}, className: '_3pzk'},
-        React.createElement(FixedDataTableCellGroupImpl144, {x: 455})
-      );
-    }
-  }",30
-isolated-reifier::arrow_function,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/deps/npm/node_modules/@npmcli/arborist/lib/arborist/isolated-reifier.js,arrow_function,"(node, location, pkg, inStore) => {
-      const newChild = {
-        global: false,
-        globalTop: false,
-        isProjectRoot: false,
-        isTop: false,
-        location,
-        name: node.name,
-        optional: node.optional,
-        top: { path: proxiedIdealTree.root.localPath },
-        children: [],
-        edgesIn: new Set(),
-        edgesOut: new Map(),
-        binPaths: [],
-        fsChildren: [],
-        /* istanbul ignore next -- emulate Node */
-        getBundler () {
-          return null
-        },
-        hasShrinkwrap: false,
-        inDepBundle: false,
-        integrity: null,
-        isLink: false,
-        isRoot: false,
-        isInStore: inStore,
-        path: join(proxiedIdealTree.root.localPath, location),
-        realpath: join(proxiedIdealTree.root.localPath, location),
-        resolved: node.resolved,
-        version: pkg.version,
-        package: pkg,
-      }
-      newChild.target = newChild
-      root.children.push(newChild)
-      root.inventory.set(newChild.location, newChild)
-    }",34
-network_http::onClientResponseFinish,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/lib/internal/inspector/network_http.js,onClientResponseFinish,"function onClientResponseFinish({ request, response }) {
-  if (typeof request[kInspectorRequestId] !== 'string') {
-    return;
-  }
-
-  let mimeType;
-  let charset;
-  try {
-    const mimeTypeObj = new MIMEType(response.headers['content-type']);
-    mimeType = mimeTypeObj.essence || '';
-    charset = mimeTypeObj.params.get('charset') || '';
-  } catch {
-    mimeType = '';
-    charset = '';
-  }
-
-  Network.responseReceived({
-    requestId: request[kInspectorRequestId],
-    timestamp: getMonotonicTime(),
-    type: kResourceType.Other,
-    response: {
-      url: request[kRequestUrl],
-      status: response.statusCode,
-      statusText: response.statusMessage ?? '',
-      headers: convertHeaderObject(response.headers)[1],
-      mimeType,
-      charset,
-    },
-  });
-
-  // Wait until the response body is consumed by user code.
-  response.once('end', () => {
-    Network.loadingFinished({
-      requestId: request[kInspectorRequestId],
-      timestamp: getMonotonicTime(),
-    });
-  });
-}",34
-mkdirp-manual::arrow_function,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/deps/npm/node_modules/cacache/node_modules/mkdirp/dist/cjs/src/mkdirp-manual.js,arrow_function,"(path, options, made) => {
-    const parent = (0, path_1.dirname)(path);
-    const opts = { ...(0, opts_arg_js_1.optsArg)(options), recursive: false };
-    if (parent === path) {
-        try {
-            return opts.mkdirSync(path, opts);
-        }
-        catch (er) {
-            // swallowed by recursive implementation on posix systems
-            // any other error is a failure
-            const fer = er;
-            if (fer && fer.code !== 'EISDIR') {
-                throw er;
-            }
-            return;
-        }
-    }
-    try {
-        opts.mkdirSync(path, opts);
-        return made || path;
-    }
-    catch (er) {
-        const fer = er;
-        if (fer && fer.code === 'ENOENT') {
-            return (0, exports.mkdirpManualSync)(path, opts, (0, exports.mkdirpManualSync)(parent, opts, made));
-        }
-        if (fer && fer.code !== 'EEXIST' && fer && fer.code !== 'EROFS') {
-            throw er;
-        }
-        try {
-            if (!opts.statSync(path).isDirectory())
-                throw er;
-        }
-        catch (_) {
-            throw er;
-        }
-    }
-}",36
-update-notifier::arrow_function,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/deps/npm/lib/cli/update-notifier.js,arrow_function,"async (npm, spec, version, current) => {
-  const pacote = require('pacote')
-
-  const mani = await pacote.manifest(`npm@${spec}`, {
-    // always prefer latest, even if doing --tag=whatever on the cmd
-    defaultTag: 'latest',
-    ...npm.flatOptions,
-    cache: false,
-  }).catch(() => null)
-
-  // if pacote failed, give up
-  if (!mani) {
-    return null
-  }
-
-  const latest = mani.version
-
-  // if the current version is *greater* than latest, we're on a 'next'
-  // and should get the updates from that release train.
-  // Note that this isn't another http request over the network, because
-  // the packument will be cached by pacote from previous request.
-  if (gt(version, latest) && spec === '*') {
-    return updateNotifier(npm, `^${version}`)
-  }
-
-  // if we already have something >= the desired spec, then we're done
-  if (gte(version, latest)) {
-    return null
-  }
-
-  const chalk = npm.logChalk
-
-  // ok!  notify the user about this update they should get.
-  // The message is saved for printing at process exit so it will not get
-  // lost in any other messages being printed as part of the command.
-  const update = parse(mani.version)
-  const type = update.major !== current.major ? 'major'
-    : update.minor !== current.minor ? 'minor'
-    : update.patch !== current.patch ? 'patch'
-    : 'prerelease'
-  const typec = type === 'major' ? 'red'
-    : type === 'minor' ? 'yellow'
-    : 'cyan'
-  const cmd = `npm install -g npm@${latest}`
-  const message = `\nNew ${chalk[typec](type)} version of npm available! ` +
-    `${chalk[typec](current)} -> ${chalk.blue(latest)}\n` +
-    `Changelog: ${chalk.blue(`https://github.com/npm/cli/releases/tag/v${latest}`)}\n` +
-    `To update run: ${chalk.underline(cmd)}\n`
-
-  return message
-}",33
-dbcs-codec::anonymous,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/deps/npm/node_modules/iconv-lite/encodings/dbcs-codec.js,anonymous,"function(buf) {
-    var newBuf = Buffer.alloc(buf.length*2),
-        nodeIdx = this.nodeIdx, 
-        prevBytes = this.prevBytes, prevOffset = this.prevBytes.length,
-        seqStart = -this.prevBytes.length, // idx of the start of current parsed sequence.
-        uCode;
-
-    for (var i = 0, j = 0; i < buf.length; i++) {
-        var curByte = (i >= 0) ? buf[i] : prevBytes[i + prevOffset];
-
-        // Lookup in current trie node.
-        var uCode = this.decodeTables[nodeIdx][curByte];
-
-        if (uCode >= 0) { 
-            // Normal character, just use it.
-        }
-        else if (uCode === UNASSIGNED) { // Unknown char.
-            // TODO: Callback with seq.
-            uCode = this.defaultCharUnicode.charCodeAt(0);
-            i = seqStart; // Skip one byte ('i' will be incremented by the for loop) and try to parse again.
-        }
-        else if (uCode === GB18030_CODE) {
-            if (i >= 3) {
-                var ptr = (buf[i-3]-0x81)*12600 + (buf[i-2]-0x30)*1260 + (buf[i-1]-0x81)*10 + (curByte-0x30);
-            } else {
-                var ptr = (prevBytes[i-3+prevOffset]-0x81)*12600 + 
-                          (((i-2 >= 0) ? buf[i-2] : prevBytes[i-2+prevOffset])-0x30)*1260 + 
-                          (((i-1 >= 0) ? buf[i-1] : prevBytes[i-1+prevOffset])-0x81)*10 + 
-                          (curByte-0x30);
-            }
-            var idx = findIdx(this.gb18030.gbChars, ptr);
-            uCode = this.gb18030.uChars[idx] + ptr - this.gb18030.gbChars[idx];
-        }
-        else if (uCode <= NODE_START) { // Go to next trie node.
-            nodeIdx = NODE_START - uCode;
-            continue;
-        }
-        else if (uCode <= SEQ_START) { // Output a sequence of chars.
-            var seq = this.decodeTableSeq[SEQ_START - uCode];
-            for (var k = 0; k < seq.length - 1; k++) {
-                uCode = seq[k];
-                newBuf[j++] = uCode & 0xFF;
-                newBuf[j++] = uCode >> 8;
-            }
-            uCode = seq[seq.length-1];
-        }
-        else
-            throw new Error(""iconv-lite internal error: invalid decoding table value "" + uCode + "" at "" + nodeIdx + ""/"" + curByte);
-
-        // Write the character to buffer, handling higher planes using surrogate pair.
-        if (uCode >= 0x10000) { 
-            uCode -= 0x10000;
-            var uCodeLead = 0xD800 | (uCode >> 10);
-            newBuf[j++] = uCodeLead & 0xFF;
-            newBuf[j++] = uCodeLead >> 8;
-
-            uCode = 0xDC00 | (uCode & 0x3FF);
-        }
-        newBuf[j++] = uCode & 0xFF;
-        newBuf[j++] = uCode >> 8;
-
-        // Reset trie node.
-        nodeIdx = 0; seqStart = i+1;
-    }
-
-    this.nodeIdx = nodeIdx;
-    this.prevBytes = (seqStart >= 0)
-        ? Array.prototype.slice.call(buf, seqStart)
-        : prevBytes.slice(seqStart + prevOffset).concat(Array.prototype.slice.call(buf));
-
-    return newBuf.slice(0, j).toString('ucs2');
-}",59
-differential_fuzz_mutator::visitor,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/deps/v8/tools/clusterfuzz/js_fuzzer/mutators/differential_fuzz_mutator.js,visitor,"() {
-    const thisMutator = this;
-    const settings = this.settings;
-
-    return {
-      // Replace existing normal print statements with deep printing.
-      CallExpression(path) {
-        if (babelTypes.isIdentifier(path.node.callee) &&
-            path.node.callee.name == 'print') {
-          path.node.callee = babelTypes.identifier('__prettyPrintExtra');
-          thisMutator.annotate(path.node, 'Pretty printing');
-        }
-      },
-      // Either print or track caught exceptions, guarded by a probability.
-      CatchClause(path) {
-        const probability = random.random();
-        if (probability < settings.DIFF_FUZZ_EXTRA_PRINT &&
-            path.node.param &&
-            babelTypes.isIdentifier(path.node.param)) {
-          const statement = prettyPrintExtraStatement(path.node.param);
-          path.node.body.body.unshift(statement);
-        } else if (probability < settings.DIFF_FUZZ_TRACK_CAUGHT) {
-          path.node.body.body.unshift(incCaught());
-        }
-      },
-      // Insert section headers and footers between the contents of two
-      // original source files. We detect the dummy no-op nodes that were
-      // previously tagged with the original path of the file.
-      Noop(path) {
-        if (!thisMutator.isSectionStart(path)) {
-          return;
-        }
-        const header = thisMutator.getSectionHeader(path);
-        const footer = thisMutator.getSectionFooter(path);
-        thisMutator.insertBeforeSkip(path, footer);
-        thisMutator.insertBeforeSkip(path, header);
-      },
-      // Additionally we print one footer in the end.
-      Program: {
-        exit(path) {
-          const footer = thisMutator.getSectionFooter(path);
-          path.node.body.push(footer);
-        },
-      },
-      // Print contents of variables after assignments, guarded by a
-      // probability.
-      ExpressionStatement(path) {
-        if (!babelTypes.isAssignmentExpression(path.node.expression) ||
-            !random.choose(settings.DIFF_FUZZ_EXTRA_PRINT)) {
-          return;
-        }
-        const left = path.node.expression.left;
-        if (babelTypes.isMemberExpression(left)) {
-          thisMutator.printVariables(path, [left.object]);
-        } else {
-          thisMutator.printVariables(path, [left]);
-        }
-      },
-      // Print contents of variables after declaration, guarded by a
-      // probability.
-      VariableDeclaration(path) {
-        if (babelTypes.isLoop(path.parent) ||
-            !random.choose(settings.DIFF_FUZZ_EXTRA_PRINT)) {
-          return;
-        }
-        const identifiers = path.node.declarations.map(decl => decl.id);
-        thisMutator.printVariables(path, identifiers);
-      },
-    };
-  }",59
-acorn::anonymous,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/deps/acorn/acorn/dist/acorn.js,anonymous,"function(node) {
-    this.next();
-    var awaitAt = (this.options.ecmaVersion >= 9 && this.canAwait && this.eatContextual(""await"")) ? this.lastTokStart : -1;
-    this.labels.push(loopLabel);
-    this.enterScope(0);
-    this.expect(types$1.parenL);
-    if (this.type === types$1.semi) {
-      if (awaitAt > -1) { this.unexpected(awaitAt); }
-      return this.parseFor(node, null)
-    }
-    var isLet = this.isLet();
-    if (this.type === types$1._var || this.type === types$1._const || isLet) {
-      var init$1 = this.startNode(), kind = isLet ? ""let"" : this.value;
-      this.next();
-      this.parseVar(init$1, true, kind);
-      this.finishNode(init$1, ""VariableDeclaration"");
-      if ((this.type === types$1._in || (this.options.ecmaVersion >= 6 && this.isContextual(""of""))) && init$1.declarations.length === 1) {
-        if (this.options.ecmaVersion >= 9) {
-          if (this.type === types$1._in) {
-            if (awaitAt > -1) { this.unexpected(awaitAt); }
-          } else { node.await = awaitAt > -1; }
-        }
-        return this.parseForIn(node, init$1)
-      }
-      if (awaitAt > -1) { this.unexpected(awaitAt); }
-      return this.parseFor(node, init$1)
-    }
-    var startsWithLet = this.isContextual(""let""), isForOf = false;
-    var containsEsc = this.containsEsc;
-    var refDestructuringErrors = new DestructuringErrors;
-    var initPos = this.start;
-    var init = awaitAt > -1
-      ? this.parseExprSubscripts(refDestructuringErrors, ""await"")
-      : this.parseExpression(true, refDestructuringErrors);
-    if (this.type === types$1._in || (isForOf = this.options.ecmaVersion >= 6 && this.isContextual(""of""))) {
-      if (awaitAt > -1) { // implies `ecmaVersion >= 9` (see declaration of awaitAt)
-        if (this.type === types$1._in) { this.unexpected(awaitAt); }
-        node.await = true;
-      } else if (isForOf && this.options.ecmaVersion >= 8) {
-        if (init.start === initPos && !containsEsc && init.type === ""Identifier"" && init.name === ""async"") { this.unexpected(); }
-        else if (this.options.ecmaVersion >= 9) { node.await = false; }
-      }
-      if (startsWithLet && isForOf) { this.raise(init.start, ""The left-hand side of a for-of loop may not start with 'let'.""); }
-      this.toAssignable(init, false, refDestructuringErrors);
-      this.checkLValPattern(init);
-      return this.parseForIn(node, init)
-    } else {
-      this.checkExpressionErrors(refDestructuringErrors, true);
-    }
-    if (awaitAt > -1) { this.unexpected(awaitAt); }
-    return this.parseFor(node, init)
-  }",52
-crossover_mutator::anonymous,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/deps/v8/tools/clusterfuzz/js_fuzzer/mutators/crossover_mutator.js,anonymous,"(path, expression) {
-    if (expression.needsSuper &&
-        !validateSuper(path, expression.source)) {
-      return undefined;
-    }
-
-    // Insert the statement.
-    let toInsert = babelTemplate(
-        expression.source,
-        sourceHelpers.BABYLON_REPLACE_VAR_OPTIONS);
-    const dependencies = {};
-    const expressionDependencies = expression.dependencies;
-
-    if (expressionDependencies) {
-      const variables = common.availableVariables(path);
-      if (variables.length < expressionDependencies.length) {
-        return undefined;
-      }
-      const chosenVariables = random.sample(
-          variables, expressionDependencies.length);
-      for (const [index, dependency] of expressionDependencies.entries()) {
-        dependencies[dependency] = chosenVariables[index];
-      }
-    }
-
-    try {
-      toInsert = toInsert(dependencies);
-    } catch (e) {
-      if (this.settings.testing) {
-        // Fail early in tests.
-        throw e;
-      }
-      console.log('ERROR: Failed to parse:', expression.source);
-      console.log(e);
-      return undefined;
-    }
-
-    if (expression.needsTryCatch) {
-      toInsert = tryCatch.wrapTryCatch(toInsert);
-    }
-
-    this.annotate(
-        toInsert,
-        'Crossover from ' + expression.originalPath);
-
-    return toInsert;
-  }",39
-utf32::anonymous,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/deps/npm/node_modules/iconv-lite/encodings/utf32.js,anonymous,"function(src) {
-    if (src.length === 0)
-        return '';
-
-    var i = 0;
-    var codepoint = 0;
-    var dst = Buffer.alloc(src.length + 4);
-    var offset = 0;
-    var isLE = this.isLE;
-    var overflow = this.overflow;
-    var badChar = this.badChar;
-
-    if (overflow.length > 0) {
-        for (; i < src.length && overflow.length < 4; i++)
-            overflow.push(src[i]);
-        
-        if (overflow.length === 4) {
-            // NOTE: codepoint is a signed int32 and can be negative.
-            // NOTE: We copied this block from below to help V8 optimize it (it works with array, not buffer).
-            if (isLE) {
-                codepoint = overflow[i] | (overflow[i+1] << 8) | (overflow[i+2] << 16) | (overflow[i+3] << 24);
-            } else {
-                codepoint = overflow[i+3] | (overflow[i+2] << 8) | (overflow[i+1] << 16) | (overflow[i] << 24);
-            }
-            overflow.length = 0;
-
-            offset = _writeCodepoint(dst, offset, codepoint, badChar);
-        }
-    }
-
-    // Main loop. Should be as optimized as possible.
-    for (; i < src.length - 3; i += 4) {
-        // NOTE: codepoint is a signed int32 and can be negative.
-        if (isLE) {
-            codepoint = src[i] | (src[i+1] << 8) | (src[i+2] << 16) | (src[i+3] << 24);
-        } else {
-            codepoint = src[i+3] | (src[i+2] << 8) | (src[i+1] << 16) | (src[i] << 24);
-        }
-        offset = _writeCodepoint(dst, offset, codepoint, badChar);
-    }
-
-    // Keep overflowing bytes.
-    for (; i < src.length; i++) {
-        overflow.push(src[i]);
-    }
-
-    return dst.slice(0, offset).toString('ucs2');
-}",36
-diff::calcOldNewLineCount,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/deps/npm/node_modules/diff/dist/diff.js,calcOldNewLineCount,"function calcOldNewLineCount(lines) {
-    var oldLines = 0;
-    var newLines = 0;
-    lines.forEach(function (line) {
-      if (typeof line !== 'string') {
-        var myCount = calcOldNewLineCount(line.mine);
-        var theirCount = calcOldNewLineCount(line.theirs);
-        if (oldLines !== undefined) {
-          if (myCount.oldLines === theirCount.oldLines) {
-            oldLines += myCount.oldLines;
-          } else {
-            oldLines = undefined;
-          }
-        }
-        if (newLines !== undefined) {
-          if (myCount.newLines === theirCount.newLines) {
-            newLines += myCount.newLines;
-          } else {
-            newLines = undefined;
-          }
-        }
-      } else {
-        if (newLines !== undefined && (line[0] === '+' || line[0] === ' ')) {
-          newLines++;
-        }
-        if (oldLines !== undefined && (line[0] === '-' || line[0] === ' ')) {
-          oldLines++;
-        }
-      }
-    });
-    return {
-      oldLines: oldLines,
-      newLines: newLines
-    };
-  }",35
-parse::anonymous,/Users/durjoy/Documents/Lab CSSE/Github_repos/javaScript/node/deps/npm/node_modules/tar/lib/parse.js,anonymous,"(opt) {
-    opt = opt || {}
-    super(opt)
-
-    this.file = opt.file || ''
-
-    // set to boolean false when an entry starts.  1024 bytes of \0
-    // is technically a valid tarball, albeit a boring one.
-    this[SAW_VALID_ENTRY] = null
-
-    // these BADARCHIVE errors can't be detected early. listen on DONE.
-    this.on(DONE, _ => {
-      if (this[STATE] === 'begin' || this[SAW_VALID_ENTRY] === false) {
-        // either less than 1 block of data, or all entries were invalid.
-        // Either way, probably not even a tarball.
-        this.warn('TAR_BAD_ARCHIVE', 'Unrecognized archive format')
-      }
-    })
-
-    if (opt.ondone) {
-      this.on(DONE, opt.ondone)
-    } else {
-      this.on(DONE, _ => {
-        this.emit('prefinish')
-        this.emit('finish')
-        this.emit('end')
-      })
-    }
-
-    this.strict = !!opt.strict
-    this.maxMetaEntrySize = opt.maxMetaEntrySize || maxMetaEntrySize
-    this.filter = typeof opt.filter === 'function' ? opt.filter : noop
-    // Unlike gzip, brotli doesn't have any magic bytes to identify it
-    // Users need to explicitly tell us they're extracting a brotli file
-    // Or we infer from the file extension
-    const isTBR = (opt.file && (
-        opt.file.endsWith('.tar.br') || opt.file.endsWith('.tbr')))
-    // if it's a tbr file it MIGHT be brotli, but we don't know until
-    // we look at it and verify it's not a valid tar file.
-    this.brotli = !opt.gzip && opt.brotli !== undefined ? opt.brotli
-      : isTBR ? undefined
-      : false
-
-    // have to set this so that streams are ok piping into it
-    this.writable = true
-    this.readable = false
-
-    this[QUEUE] = new Yallist()
-    this[BUFFER] = null
-    this[READENTRY] = null
-    this[WRITEENTRY] = null
-    this[STATE] = 'begin'
-    this[META] = ''
-    this[EX] = null
-    this[GEX] = null
-    this[ENDED] = false
-    this[UNZIP] = null
-    this[ABORTED] = false
-    this[SAW_NULL_BLOCK] = false
-    this[SAW_EOF] = false
-
-    this.on('end', () => this[CLOSESTREAM]())
-
-    if (typeof opt.onwarn === 'function') {
-      this.on('warn', opt.onwarn)
-    }
-    if (typeof opt.onentry === 'function') {
-      this.on('entry', opt.onentry)
-    }
-  }",50
+  }, strategy);
+}",55
