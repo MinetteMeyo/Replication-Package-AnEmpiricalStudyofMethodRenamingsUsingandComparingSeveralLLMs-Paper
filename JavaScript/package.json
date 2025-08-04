@@ -19,6 +19,8 @@
   "license": "MIT",
   "dependencies": {
     "acorn": "^8.11.3",
+    "axios": "^1.6.0",
+    "@anthropic-ai/sdk": "^0.18.0",
     "csv-parser": "^3.2.0",
     "csv-writer": "^1.6.0",
     "gpt-3-encoder": "^1.1.4",
