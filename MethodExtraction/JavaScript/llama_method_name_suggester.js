@@ -43,49 +43,11 @@ function countTokens(text) {
   }
 }
 
-function extractMethodBody(filePath, methodName) {
-  try {
-    const content = fs.readFileSync(filePath, 'utf-8');
-    let match = null;
-    let pattern;
-
-    // 1. function declarations: function methodName(...) { ... }
-    pattern = new RegExp(`function\\s+${methodName.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}\\s*\\([^)]*\\)\\s*{`, 'g');
-    match = pattern.exec(content);
-
-    // 2. class/object methods: methodName(...) { ... }
-    if (!match) {
-      pattern = new RegExp(`(^|[\s;])${methodName.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}\\s*\\([^)]*\\)\\s*{`, 'g');
-      match = pattern.exec(content);
-    }
-
-    // 3. arrow functions: const methodName = (...) => { ... }
-    if (!match) {
-      pattern = new RegExp(`(const|let|var)\\s+${methodName.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}\\s*=\\s*\\([^)]*\\)\\s*=>\\s*{`, 'g');
-      match = pattern.exec(content);
-    }
-
-    if (!match) return null;
-
-    const methodStart = match.index;
-    // Find the matching closing brace for the function body
-    let openBraces = 0, i = match.index;
-    let started = false;
-    for (; i < content.length; i++) {
-      if (content[i] === '{') {
-        openBraces++;
-        started = true;
-      } else if (content[i] === '}') {
-        openBraces--;
-      }
-      if (started && openBraces === 0) break;
-    }
-    const methodBody = content.substring(methodStart, i + 1);
-    return methodBody;
-  } catch (e) {
-    console.error(`Error reading ${filePath}: ${e}`);
-    return null;
-  }
+function anonymizeMethodName(methodBody, methodName) {
+  // Anonymize JavaScript function declaration: function foo(...) -> function method_name(...)
+  // Aligns with Java/Python: Java anonymizes signature, Python anonymizes def foo
+  const escaped = methodName.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+  return methodBody.replace(new RegExp(`function\\s+${escaped}\\s*\\(`), 'function method_name(');
 }
 
 function extractContext(filePath, methodBody) {
@@ -138,9 +100,9 @@ async function callLlamaWithRetry(messages, maxRetries = 5) {
   throw new Error('Exceeded max retries due to rate limits.');
 }
 
-async function generateMethodNames(methodBody, context) {
-  // Anonymize the method name
-  const anonymizedBody = methodBody.replace(/def\s+\w+/, 'def method_name');
+async function generateMethodNames(methodBody, context, methodName) {
+  // Anonymize the method name (JavaScript: function foo(...) -> function method_name(...))
+  const anonymizedBody = anonymizeMethodName(methodBody, methodName);
   const methodTokens = countTokens(anonymizedBody);
   const availableTokens = MAX_TOKENS - (methodTokens + RESPONSE_TOKENS + PROMPT_TOKENS);
   const truncatedContext = truncateContext(context, availableTokens);
@@ -186,19 +148,13 @@ async function processCsv(inputCsv, outputCsv) {
 
   const outputRows = [];
   for (const row of rows) {
-    const fullyQualifiedName = row[Object.keys(row)[0]];
-    const filePath = row[Object.keys(row)[1]];
-    const methodDescription = row[Object.keys(row)[2]];
-    let methodName;
-    if (fullyQualifiedName.includes('::')) {
-      methodName = fullyQualifiedName.split('::').pop();
-    } else {
-      methodName = fullyQualifiedName.split('.').pop();
-    }
+    const fullyQualifiedName = row['Fully Qualified Name'] ?? row[Object.keys(row)[0]];
+    const filePath = row['File Path'] ?? row[Object.keys(row)[1]];
+    const methodName = row['Method Name'] ?? (fullyQualifiedName.includes('::') ? fullyQualifiedName.split('::').pop() : fullyQualifiedName.split('.').pop());
+    const methodBody = row['Method Body'] ?? row[Object.keys(row)[3]];
     console.log(`Processing: ${fullyQualifiedName}`);
-    const methodBody = extractMethodBody(filePath, methodName);
-    if (!methodBody) {
-      console.log(`Method ${methodName} not found in ${filePath}`);
+    if (!methodBody || !methodBody.trim()) {
+      console.log(`Method ${methodName} has no body in CSV (skipping)`);
       outputRows.push({
         fullyQualifiedName,
         filePath,
@@ -213,7 +169,7 @@ async function processCsv(inputCsv, outputCsv) {
     const { contextBefore, contextAfter } = extractContext(filePath, methodBody);
     const context = contextBefore + contextAfter;
     const contextTokens = countTokens(context);
-    const suggestedNames = await generateMethodNames(methodBody, context);
+    const suggestedNames = await generateMethodNames(methodBody, context, methodName);
     outputRows.push({
       fullyQualifiedName,
       filePath,
