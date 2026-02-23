@@ -1,14 +1,17 @@
 NamingRefactoring
 =================
 
-This repository is a **research project** that evaluates the impact of large language models (LLMs) on method renaming tasks, with a current focus on **method renaming** across multiple programming languages (Java / Python / JavaScript).  
+This repository is a **research project** that evaluates the impact of large language models (LLMs) on renaming tasks, with a current focus on **method renaming** across multiple programming languages (Java / Python / JavaScript).  
 
 The overall workflow is:
 
-- **Define refactoring task types**: method renaming from legacy code base.
+- **Select GitHub repositories with specific characteristics**: From the defined characteristics, select 30 repos, 10 each in Java, Python, and JavaScript (JS).
+- **Randomly extract 15 methods (signature + body implementation), five each in Java, Python, and JS from the selected methods**: random extraction of methods and storage of the resulted file.
 - **Extract methods from real GitHub projects** (multi-language AST / parser–based extraction).
-- **Query multiple LLMs for renaming suggestions**.
-- **Analyze the results** 
+- **Human developers method name suugestions:**: Submit the extracted method body implementations to human developers to suggest names through Survey 1
+- **LLMs method name suggestions**: Submit the extracted method body implementations to the three LLMs for method name suggestions through prompting
+- **Expert ranking**:Submit the extracted method body implementations with all suggested method names to expert developers to rank the names from most to least appropriate using a Lickert scale
+- **Analyze the results**: Statistical test to answer the three research questions RQ1, RQ2, RQ3
 
 ---
 
@@ -46,7 +49,7 @@ Repository Structure
 
 ---
 
-Workflow / How to Use
+Workflow for the first three steps / How to Use
 ---------------------
 
 > Note: This is research code. Several scripts contain **hard‑coded paths and API keys**. Before reproducing any experiments, adapt these values to your environment.
@@ -54,7 +57,7 @@ Workflow / How to Use
 ### 1. Environment Setup
 
 - **Core software**
-  - Python 3 (3.9+ recommended) with dependencies such as `openai`, `anthropic`, `tiktoken`, `requests`, etc.
+  - Python 3 (3.12+ recommended) with dependencies such as `openai`, `anthropic`, `tiktoken`, `requests`, etc.
   - Node.js (≥ 14 recommended) for JavaScript parsing and JS‑based LLM client scripts.
   - Java (JDK and Maven) for Java method extraction and LLM clients.
 
@@ -76,7 +79,7 @@ Once the target language repositories are cloned locally, run the language‑spe
 
 - **Python method extraction**
   - Go to `MethodExtraction/Python/`.  
-  - Configure the code root directory (many scripts assume something like `/Users/durjoy/Documents/Lab CSSE/Github_repos/`; you should change this to your own path).  
+  - Configure the code root directory (many scripts assume something like `/Users/yourUsername/Documents/Lab/Github_repos/`; you should change this to your own path).  
   - Run:
 
     ```bash
@@ -165,6 +168,8 @@ These CSVs are then used for:
 
 ---
 
+
+
 Important Notes
 ---------------
 
@@ -172,8 +177,18 @@ Important Notes
   - Several scripts use absolute paths like `/Users/durjoy/Documents/Lab CSSE/Github_repos/` and `/Users/durjoy/Documents/Lab CSSE/Result_files/`.  
   - Before running in a different environment, unify these to the correct local paths or refactor them into configurable parameters.
 
-
 ---
+
+
+### Human developers method name suugestions
+Survey 1 (questions and answers) is accessible [here](https://forms.gle/474pdsPGGbhoywBy6).
+- **LLMs method name suggestions**: Submit the extracted method body implementations to the three LLMs for method name suggestions through prompting
+- **Expert ranking**:Submit the extracted method body implementations with all suggested method names to expert developers to rank the names from most to least appropriate using a Lickert scale
+- **Analyze the results**: Statistical test to answer the three research questions RQ1, RQ2, RQ3
+
+
+
+
 
 Contributing
 ------------
