@@ -91,8 +91,6 @@ def select_cluster_exemplar(cluster_indices, similarity_matrix):
     
     return best_idx
 
-# MAIN PIPELINE
-
 def select_two_names_per_snippet(method_snippet, proposed_names, ground_truth_threshold=0.3, verbose=True):
     
     if verbose:
@@ -225,7 +223,7 @@ def select_two_names_per_snippet(method_snippet, proposed_names, ground_truth_th
       
 # BATCH PROCESSING
 
-CSV_FILE = "/home/minette/Documents/ConcordiaLabs/LLM_paper/method_names.csv"
+CSV_FILE = "../method_names.csv"
 OUTPUT_FILE = "selected_names_per_snippet.csv"
 GROUND_TRUTH_THRESHOLD = 0.3
 
@@ -284,3 +282,4 @@ for idx, row in df.iterrows():
 # Save results
 output_df = pd.DataFrame(results)
 output_df.to_csv(OUTPUT_FILE, index=False)
+
