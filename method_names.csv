@@ -1,0 +1,897 @@
+snippet_id,method_snippet,suggested_names
+1,"public void java1() {
+        // shows distance to all vertices
+        // Interactive run for understanding the
+        // class first time. Assumes source vertex is 0 and
+        try (Scanner sc = new Scanner(System.in)) {
+            int i;
+            int v;
+            int e;
+            int u;
+            int ve;
+            int w;
+            int j;
+            int neg = 0;
+            System.out.println(""Enter no. of vertices and edges please"");
+            v = sc.nextInt();
+            e = sc.nextInt();
+            Edge[] arr = new Edge[e]; // Array of edges
+            System.out.println(""Input edges"");
+            for (i = 0; i < e; i++) {
+                u = sc.nextInt();
+                ve = sc.nextInt();
+                w = sc.nextInt();
+                arr[i] = new Edge(u, ve, w);
+            }
+            int[] dist = new int[v]; // Distance array for holding the finalized shortest path distance
+                                     // between source
+            // and all vertices
+            int[] p = new int[v]; // Parent array for holding the paths
+            for (i = 0; i < v; i++) {
+                dist[i] = Integer.MAX_VALUE; // Initializing distance values
+            }
+            dist[0] = 0;
+            p[0] = -1;
+            for (i = 0; i < v - 1; i++) {
+                for (j = 0; j < e; j++) {
+                    if (dist[arr[j].u] != Integer.MAX_VALUE && dist[arr[j].v] > dist[arr[j].u] + arr[j].w) {
+                        dist[arr[j].v] = dist[arr[j].u] + arr[j].w; // Update
+                        p[arr[j].v] = arr[j].u;
+                    }
+                }
+            }
+            // Final cycle for negative checking
+            for (j = 0; j < e; j++) {
+                if (dist[arr[j].u] != Integer.MAX_VALUE && dist[arr[j].v] > dist[arr[j].u] + arr[j].w) {
+                    neg = 1;
+                    System.out.println(""Negative cycle"");
+                    break;
+                }
+            }
+            if (neg == 0) { // Go ahead and show results of computation
+                System.out.println(""Distances are: "");
+                for (i = 0; i < v; i++) {
+                    System.out.println(i + "" "" + dist[i]);
+                }
+                System.out.println(""Path followed:"");
+                for (i = 0; i < v; i++) {
+                    System.out.print(""0 "");
+                    printPath(p, i);
+                    System.out.println();
+                }
+            }
+        }
+    }","ShortestPath, computeShortestPath, runDijkstraAlgorithm, pathCalculator, runBellmanFordAlgorithm, bellmanFordShortestPath, findShortestPathsWithBellmanFord, SolveGraph, setEdges, getShortestDist, findShortestPath, getShortestPath, detectNegativeCycleAndPrintDistances, computePath, calculateDistance, dijkstraShortestPath, findShortestPaths, runDijkstraAlgorithm, calculateShortestDistances, findShortestPath, findShortestPath, findShortestPaths, CalculateShortestDistanceBetweenVertices, printGraphInfo, pathFinding, calculateShortestDistance, bellmanFord, bellmanFordShortestPath, printGraphDistancesAndPaths, GraphShortestPathSolver, computeShortestPath"
+2,"void java2(int timeSoFar, int totalTime) {
+    var start = System.currentTimeMillis();
+    var end = System.currentTimeMillis();
+    while (end - start + timeSoFar < totalTime && continueRound()) {
+      for (var i = 0; i < this.cells.length; i++) {
+        var points = 0;
+        var j = this.cells.length - 1;
+        while (this.cells[j][i].candy.getType().equals(Type.REWARD_FRUIT)) {
+          points = this.cells[j][i].candy.getPoints();
+          this.cells[j][i].crush(pool, this.cells);
+          handleChange(points);
+        }
+      }
+      for (var i = 0; i < this.cells.length; i++) {
+        var j = cells.length - 1;
+        var points = 0;
+        while (j > 0) {
+          points = this.cells[j][i].interact(this.cells[j - 1][i], this.pool, this.cells);
+          if (points != 0) {
+            handleChange(points);
+          } else {
+            j = j - 1;
+          }
+        }
+      }
+      for (Cell[] cell : this.cells) {
+        var j = 0;
+        var points = 0;
+        while (j < cells.length - 1) {
+          points = cell[j].interact(cell[j + 1], this.pool, this.cells);
+          if (points != 0) {
+            handleChange(points);
+          } else {
+            j = j + 1;
+          }
+        }
+      }
+      end = System.currentTimeMillis();
+    }
+  }
+  
+  boolean continueRound() {
+    for (var i = 0; i < this.cells.length; i++) {
+      if (this.cells[cells.length - 1][i].candy.getType().equals(Type.REWARD_FRUIT)) {
+        return true;
+      }
+    }
+    for (var i = 0; i < this.cells.length; i++) {
+      for (var j = 0; j < this.cells.length; j++) {
+        if (!this.cells[i][j].candy.getType().equals(Type.REWARD_FRUIT)) {
+          var adj = adjacentCells(i, j);
+          for (Cell cell : adj) {
+            if (this.cells[i][j].candy.name.equals(cell.candy.name)) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+    return false;
+  }","PublishDockerComposeServices, computePoints, calculatePointsInRound, rewardFruitInteraction, RunCandyCrushRound, processGameRound, ExecuteCandyMatchLoop, simulateCandyCrushTurn, playCandyCrushRound, updateGameBoardWithMatches, handleRoundExecution, candyCrush, runningTime, ExecutingTime, getCandyScore, updateStatus, runGameRound, playCandyCrush, configurGame, playGame, runGameLoop, executeGameSession, playGameRound, CollectAllAdjacentCandyPoints, startGame, processGame, processGameRound, collectPointsUntilTimeout, findPoints, calculatePoints, gameLoop, executeGameLoop, SelectPointsToHandle, runGameLoop, Time"
+3,"void java3(Node x) {
+        while (x != root && x.color == BLACK) {
+            if (x == x.p.left) {
+                Node w = x.p.right;
+                if (w.color == RED) {
+                    w.color = BLACK;
+                    x.p.color = RED;
+                    rotateLeft(x.p);
+                    w = x.p.right;
+                }
+                if (w.left.color == BLACK && w.right.color == BLACK) {
+                    w.color = RED;
+                    x = x.p;
+                    continue;
+                } else if (w.right.color == BLACK) {
+                    w.left.color = BLACK;
+                    w.color = RED;
+                    rotateRight(w);
+                    w = x.p.right;
+                }
+                if (w.right.color == RED) {
+                    w.color = x.p.color;
+                    x.p.color = BLACK;
+                    w.right.color = BLACK;
+                    rotateLeft(x.p);
+                    x = root;
+                }
+            } else {
+                Node w = x.p.left;
+                if (w.color == RED) {
+                    w.color = BLACK;
+                    x.p.color = RED;
+                    rotateRight(x.p);
+                    w = x.p.left;
+                }
+                if (w.right.color == BLACK && w.left.color == BLACK) {
+                    w.color = RED;
+                    x = x.p;
+                    continue;
+                } else if (w.left.color == BLACK) {
+                    w.right.color = BLACK;
+                    w.color = RED;
+                    rotateLeft(w);
+                    w = x.p.left;
+                }
+                if (w.left.color == RED) {
+                    w.color = x.p.color;
+                    x.p.color = BLACK;
+                    w.left.color = BLACK;
+                    rotateRight(x.p);
+                    x = root;
+                }
+            }
+        }
+        x.color = BLACK;
+}
+    
+public void insertDemo() {
+	Scanner scan = new Scanner(System.in);
+        System.out.println(""Add items"");
+        int item;
+        Node node;
+        item = scan.nextInt();
+        while (item != -999) {
+            node = new Node(item);
+            insert(node);
+            item = scan.nextInt();
+        }
+        printTree(root);
+        System.out.println(""Pre order"");
+        printTreepre(root);
+        scan.close();
+}","colorizeGraph, applyRotations, fixColors, applyBlackColor, fixRedBlackViolations, FixRedBlackTreeAfterInsert, rebalanceAfterInsertion, restoreRedBlackProperties, balanceRedBlackTree, InsertFixup, fixTreeAfterInsert, enforceRBTreeProperties, colorGraph, rotate, changeDirection, changeColor, changeNodeColorAndRotate, updateTree, fixDeletionRBTree, traverseNodes, traverseWhileBlack, placeBlackAsNode, insertRedBlackNode, insertAndBalance, colorTheGraph, restoreRedBlackTree, rearrangeRedBlackTree, fixAfterDelete, colorNodes, colorNodeAndChildren, colorNodeRec, treeTraverse, fixTreeColor, balanceRedBlackTree, fixRedBlackTree, selectNodeColor, fixDelete, insertRedBlackTree"
+4,"public void java4() {
+    var frame = new JFrame(""Album"");
+    var b1 = Box.createHorizontalBox();
+
+    frame.add(b1);
+    albumList = new JList<>(model.getAlbumList());
+    albumList.addMouseListener(new MouseAdapter() {
+      @Override
+      public void mouseClicked(final MouseEvent e) {
+        model.setSelectedAlbumNumber(albumList.getSelectedIndex() + 1);
+        loadFromMod();
+      }
+    });
+    b1.add(albumList);
+    var b2 = Box.createVerticalBox();
+    b1.add(b2);
+    txtArtist = new TextField();
+    txtTitle = new TextField();
+    txtArtist.setSize(WIDTH_TXT, HEIGHT_TXT);
+    txtTitle.setSize(WIDTH_TXT, HEIGHT_TXT);
+    chkClassical = new JCheckBox();
+    txtComposer = new TextField();
+    chkClassical.addActionListener(itemEvent -> {
+      txtComposer.setEditable(chkClassical.isSelected());
+      if (!chkClassical.isSelected()) {
+        txtComposer.setText("""");
+      }
+    });
+    txtComposer.setSize(WIDTH_TXT, HEIGHT_TXT);
+    txtComposer.setEditable(model.getIsClassical());
+
+    apply = new JButton(""Apply"");
+    apply.addMouseListener(new MouseAdapter() {
+      @Override
+      public void mouseClicked(final MouseEvent e) {
+        saveToMod();
+        loadFromMod();
+      }
+    });
+    cancel = new JButton(""Cancel"");
+    cancel.addMouseListener(new MouseAdapter() {
+      @Override
+      public void mouseClicked(final MouseEvent e) {
+        loadFromMod();
+      }
+    });
+    b2.add(txtArtist);
+    b2.add(txtTitle);
+    b2.add(chkClassical);
+    b2.add(txtComposer);
+    b2.add(apply);
+    b2.add(cancel);
+    frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+    frame.setBounds(LOCATION_X, LOCATION_Y, WIDTH, HEIGHT);
+    frame.setVisible(true);
+}
+
+public void saveToMod() {
+    LOGGER.info(""Save data to PresentationModel"");
+    model.setArtist(txtArtist.getText());
+    model.setTitle(txtTitle.getText());
+    model.setIsClassical(chkClassical.isSelected());
+    model.setComposer(txtComposer.getText());
+}
+
+public void loadFromMod() {
+    LOGGER.info(""Load data from PresentationModel"");
+    txtArtist.setText(model.getArtist());
+    txtTitle.setText(model.getTitle());
+    chkClassical.setSelected(model.getIsClassical());
+    txtComposer.setEditable(model.getIsClassical());
+    txtComposer.setText(model.getComposer());
+}","TestServiceConnections, createSongRegistrationForm, displayAlbumList, displayAlbumListFromModel, displayAlbumsAndEditClassical, initializeAlbumUI, setupAlbumWindow, InitializeAlbumEditorUI, createAlbumEditorFrame, setupAlbumEditorWindow, buildAlbumEditorUI, displayAlbumEditor, initAlbumManagerUI, launchAlbumEditor, loadAlbumForm, createAlbum, makeAlbum, createAlbum, handleAlbumActions, operateAlbum, buildAlbumEditorUI, createMusicAlbum, createMusicPlayer, configureInteractiveMusicAlbum, initializeUserInterface, setupGUI, captureMouseEventsInsideFrame, createAlbumEditorUI, showAlbumManager, createAlbumFrame, createJFrame, drawForm, setUpUI, buildGUI, createAlbumForm, createAlbumEditorUI, buildView
+"
+5,"protected void java5(T factory, ConnectionFactory connectionFactory,
+			RabbitProperties.AmqpContainer configuration) {
+		Assert.notNull(factory, ""'factory' must not be null"");
+		Assert.notNull(connectionFactory, ""'connectionFactory' must not be null"");
+		Assert.notNull(configuration, ""'configuration' must not be null"");
+		factory.setConnectionFactory(connectionFactory);
+		if (this.messageConverter != null) {
+			factory.setMessageConverter(this.messageConverter);
+		}
+		factory.setAutoStartup(configuration.isAutoStartup());
+		if (configuration.getAcknowledgeMode() != null) {
+			factory.setAcknowledgeMode(configuration.getAcknowledgeMode());
+		}
+		if (configuration.getPrefetch() != null) {
+			factory.setPrefetchCount(configuration.getPrefetch());
+		}
+		if (configuration.getDefaultRequeueRejected() != null) {
+			factory.setDefaultRequeueRejected(configuration.getDefaultRequeueRejected());
+		}
+		if (configuration.getIdleEventInterval() != null) {
+			factory.setIdleEventInterval(configuration.getIdleEventInterval().toMillis());
+		}
+		factory.setMissingQueuesFatal(configuration.isMissingQueuesFatal());
+		factory.setDeBatchingEnabled(configuration.isDeBatchingEnabled());
+		factory.setForceStop(configuration.isForceStop());
+		if (this.taskExecutor != null) {
+			factory.setTaskExecutor(this.taskExecutor);
+		}
+		factory.setObservationEnabled(configuration.isObservationEnabled());
+		ListenerRetry retryConfig = configuration.getRetry();
+		if (retryConfig.isEnabled()) {
+			RetryInterceptorBuilder<?, ?> builder = (retryConfig.isStateless()) ? RetryInterceptorBuilder.stateless()
+					: RetryInterceptorBuilder.stateful();
+			RetryTemplate retryTemplate = new RetryTemplateFactory(this.retryTemplateCustomizers)
+				.createRetryTemplate(retryConfig, RabbitRetryTemplateCustomizer.Target.LISTENER);
+			builder.retryOperations(retryTemplate);
+			MessageRecoverer recoverer = (this.messageRecoverer != null) ? this.messageRecoverer
+					: new RejectAndDontRequeueRecoverer();
+			builder.recoverer(recoverer);
+			factory.setAdviceChain(builder.build());
+		}
+}
+	
+protected void setMessageRecoverer(MessageRecoverer messageRecoverer) {
+		this.messageRecoverer = messageRecoverer;
+}
+
+protected void setRetryTemplateCustomizers(List<RabbitRetryTemplateCustomizer> retryTemplateCustomizers) {
+		this.retryTemplateCustomizers = retryTemplateCustomizers;
+}
+
+public void setTaskExecutor(Executor taskExecutor) {
+		this.taskExecutor = taskExecutor;
+}
+
+protected final RabbitProperties getRabbitProperties() {
+		return this.rabbitProperties;
+}","ValidateManifest, setUpConnection, setupFactory, configureRabbitSettings, initializeRabbitConfiguration, InitializeListenerContainerFactory, setupRabbitContainerFactory, customizeAmqpListenerFactory, applyAmqpConfiguration, configureMessageListenerFactory, rabbitBuilderMethod, configureFactory, startFactory, runFactory, run, FactorySetup, configRabbitProperties, configureRabbitListenerContainerFactory, configureMessageQueuingSystem, configureMessageQueue, connectEventQueue,  initializeMessageFactory, setupRabbitMQFactory, applyConfigurationToConnectionFactory, configureRabbitListener, applyRabitConfiguration, configureRabbitFactory, InitFactory, resetFactory, configureConnection, applyRabbitMqSettings, buildQueue, setupRabbitListenerContainer, ConfigureAndLaunch"
+6,"def python1(
+        self, outputs: ""MaskFormerForInstanceSegmentationOutput"", target_size: Tuple[int, int] = None
+    ) -> ""torch.Tensor"":
+        """"""
+        
+        Args:
+            outputs ([`MaskFormerForInstanceSegmentationOutput`]):
+                The outputs from [`MaskFormerForInstanceSegmentation`].
+
+            target_size (`Tuple[int, int]`, *optional*):
+                If set, the `masks_queries_logits` will be resized to `target_size`.
+
+        Returns:
+            `torch.Tensor`:
+                A tensor of shape (`batch_size, num_class_labels, height, width`).
+        """"""
+        warnings.warn(
+            ""`post_process_segmentation` is deprecated and will be removed in v5 of Transformers, please use""
+            "" `post_process_instance_segmentation`"",
+            FutureWarning,
+        )
+
+        # class_queries_logits has shape [BATCH, QUERIES, CLASSES + 1]
+        class_queries_logits = outputs.class_queries_logits
+        # masks_queries_logits has shape [BATCH, QUERIES, HEIGHT, WIDTH]
+        masks_queries_logits = outputs.masks_queries_logits
+        if target_size is not None:
+            masks_queries_logits = torch.nn.functional.interpolate(
+                masks_queries_logits,
+                size=target_size,
+                mode=""bilinear"",
+                align_corners=False,
+            )
+        # remove the null class `[..., :-1]`
+        masks_classes = class_queries_logits.softmax(dim=-1)[..., :-1]
+        # mask probs has shape [BATCH, QUERIES, HEIGHT, WIDTH]
+        masks_probs = masks_queries_logits.sigmoid()
+        # now we want to sum over the queries,
+        # $ out_{c,h,w} =  \sum_q p_{q,c} * m_{q,h,w} $
+        # where $ softmax(p) \in R^{q, c} $ is the mask classes
+        # and $ sigmoid(m) \in R^{q, h, w}$ is the mask probabilities
+        # b(atch)q(uery)c(lasses), b(atch)q(uery)h(eight)w(idth)
+        segmentation = torch.einsum(""bqc, bqhw -> bchw"", masks_classes, masks_probs)
+
+        return segmentation
+
+
+def get_max_height_width(
+    images: List[np.ndarray], input_data_format: Optional[Union[str, ChannelDimension]] = None
+) -> List[int]:
+    """"""
+    Get the maximum height and width across all images in a batch.
+    """"""
+    if input_data_format is None:
+        input_data_format = infer_channel_dimension_format(images[0])
+
+    if input_data_format == ChannelDimension.FIRST:
+        _, max_height, max_width = max_across_indices([img.shape for img in images])
+    elif input_data_format == ChannelDimension.LAST:
+        max_height, max_width, _ = max_across_indices([img.shape for img in images])
+    else:
+        raise ValueError(f""Invalid channel dimension format: {input_data_format}"")
+    return (max_height, max_width)","format_output, segment_to_size, create_segmentation, get_segmentation_tensor, post_Process_Segmentation, process_Segmentation_Output, generate_segmentation_masks, compute_segmentation_output, process_maskformer_output, decode_segmentation_logits, create_segmentation_tensor, tensor_factory, get_outputs_target_size, get_label_segment, output_segmentation_generator, process_segmentation, post_process_instance_segmentation, perform_image_segmentation, post_process_segmentation, process_segmentation_output, generate_segmentation_maps, compute_segmentation_from_maskformer, process_maskformer_output, get_egmented_mask, get_segmentation_tensor, _check_batch, segmentation, process_segmentation, interpolate_segments, generate_instance_segmentation, computeMaskForInstanceSegmentation"
+7,"def python2(
+        self,
+        pixel_values: Optional[torch.FloatTensor] = None,
+        labels: Optional[torch.LongTensor] = None,
+        output_hidden_states: Optional[bool] = None,
+        return_dict: Optional[bool] = None,
+    ) -> Union[Tuple, ImageClassifierOutputWithNoAttention]:
+        r""""""
+        labels (`torch.LongTensor` of shape `(batch_size,)`, *optional*):
+            Labels for computing the image classification/regression loss. Indices should be in `[0, ...,
+            config.num_labels - 1]`. If `config.num_labels == 1` a regression loss is computed (Mean-Square loss), If
+            `config.num_labels > 1` a classification loss is computed (Cross-Entropy).
+        """"""
+        return_dict = return_dict if return_dict is not None else self.config.use_return_dict
+
+        outputs = self.poolformer(
+            pixel_values,
+            output_hidden_states=output_hidden_states,
+            return_dict=return_dict,
+        )
+
+        sequence_output = outputs[0]
+
+        logits = self.classifier(self.norm(sequence_output).mean([-2, -1]))
+
+        loss = None
+        if labels is not None:
+            if self.config.problem_type is None:
+                if self.num_labels == 1:
+                    self.config.problem_type = ""regression""
+                elif self.num_labels > 1 and (labels.dtype == torch.long or labels.dtype == torch.int):
+                    self.config.problem_type = ""single_label_classification""
+                else:
+                    self.config.problem_type = ""multi_label_classification""
+
+            if self.config.problem_type == ""regression"":
+                loss_fct = MSELoss()
+                if self.num_labels == 1:
+                    loss = loss_fct(logits.squeeze(), labels.squeeze())
+                else:
+                    loss = loss_fct(logits, labels)
+            elif self.config.problem_type == ""single_label_classification"":
+                loss_fct = CrossEntropyLoss()
+                loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
+            elif self.config.problem_type == ""multi_label_classification"":
+                loss_fct = BCEWithLogitsLoss()
+                loss = loss_fct(logits, labels)
+
+        if not return_dict:
+            output = (logits,) + outputs[2:]
+            return ((loss,) + output) if loss is not None else output
+
+        return ImageClassifierOutputWithNoAttention(loss=loss, logits=logits, hidden_states=outputs.hidden_states)
+        
+class PoolFormerOutput(nn.Module):
+    def __init__(self, config, dropout_prob, hidden_size, intermediate_size):
+        super().__init__()
+        self.conv1 = nn.Conv2d(hidden_size, intermediate_size, 1)
+        self.conv2 = nn.Conv2d(intermediate_size, hidden_size, 1)
+        self.drop = PoolFormerDropPath(dropout_prob)
+        if isinstance(config.hidden_act, str):
+            self.act_fn = ACT2FN[config.hidden_act]
+        else:
+            self.act_fn = config.hidden_act","image_classification, classify_image, create_image_classifier_no_attention, process_Input_And_Compute_Loss, image_Classification_With_Loss_Calculation, compute_logits, classification_step, predict_logits, forward_pass, run_classification, setup_classification_algorithm, get_pixel_values_labels, configure_predict_image, classify_images, forward_classification, perform_image_classification, forward_classification, compute_image_classification, clasify_image_with_labels, predict_and_compute_loss, compute_loss_and_output, classify_image, _reg_class_task, select_problem_type, forward_pass, build_image_classifier, run_classification, configureImageClassifier"
+8,"def python3(
+    logits, labels, device, pred_boxes, pred_masks, config, outputs_class=None, outputs_coord=None, **kwargs
+):
+    # First: create the matcher
+    matcher = HungarianMatcher(class_cost=config.class_cost, bbox_cost=config.bbox_cost, giou_cost=config.giou_cost)
+    # Second: create the criterion
+    losses = [""labels"", ""boxes"", ""cardinality"", ""masks""]
+    criterion = DeformableDetrImageLoss(
+        matcher=matcher,
+        num_classes=config.num_labels,
+        focal_alpha=config.focal_alpha,
+        losses=losses,
+    )
+    criterion.to(device)
+    # Third: compute the losses, based on outputs and labels
+    outputs_loss = {}
+    outputs_loss[""logits""] = logits
+    outputs_loss[""pred_boxes""] = pred_boxes
+    outputs_loss[""pred_masks""] = pred_masks
+
+    auxiliary_outputs = None
+    if config.auxiliary_loss:
+        auxiliary_outputs = _set_aux_loss(outputs_class, outputs_coord)
+        outputs_loss[""auxiliary_outputs""] = auxiliary_outputs
+
+    loss_dict = criterion(outputs_loss, labels)
+    # Fourth: compute total loss, as a weighted sum of the various losses
+    weight_dict = {""loss_ce"": 1, ""loss_bbox"": config.bbox_loss_coefficient}
+    weight_dict[""loss_Gil""] = config.giou_loss_coefficient
+    weight_dict[""loss_mask""] = config.mask_loss_coefficient
+    weight_dict[""loss_dice""] = config.dice_loss_coefficient
+    if config.auxiliary_loss:
+        aux_weight_dict = {}
+        for i in range(config.decoder_layers - 1):
+            aux_weight_dict.update({k + f""_{i}"": v for k, v in weight_dict.items()})
+        weight_dict.update(aux_weight_dict)
+
+    loss = sum(loss_dict[k] * weight_dict[k] for k in loss_dict.keys() if k in weight_dict)
+    return loss, loss_dict, auxiliary_outputs
+    
+class DeformableDetrImageLoss(ImageLoss):
+    def __init__(self, matcher, num_classes, focal_alpha, losses):
+        nn.Module.__init__(self)
+        self.matcher = matcher
+        self.num_classes = num_classes
+        self.focal_alpha = focal_alpha
+        self.losses = losses","training_classifier, compute_loss, compute_losses, get_loss, get_losses, calculate_losses, compute_Detection_Loss, compute_detr_loss, calculate_loss, detr_loss_function, compute_training_loss, loss_step, criterion_forward, compute_losses, calculate_losses, set_matcher_losses, compute_loss, compute_loss, compute_detr_loss, loss_function, compute_detection_loss, match_images_to_criteria, compute_detection_loss, compute_total_loss, match_image, _loss_calc, compute_loss, calculate_loss, compute_loss, calc_loss, calculate_detection_loss"
+9,"def python4(
+        self,
+        tokens: List[str],
+        group_tokens: bool = True,
+        spaces_between_special_tokens: bool = False,
+        filter_word_delimiter_token: bool = True,
+        output_char_offsets: bool = False,
+    ) -> str:
+             
+        # group same tokens into non-repeating tokens in CTC style decoding
+        if group_tokens:
+            chars, char_repetitions = zip(*((token, len(list(group_iter))) for token, group_iter in groupby(tokens)))
+        else:
+            chars = tokens
+            char_repetitions = len(tokens) * [1]
+
+        # filter self.pad_token which is used as CTC-blank token
+        processed_chars = list(filter(lambda char: char != self.pad_token, chars))
+
+        # also filter self.word_delimiter_token if not not
+        if filter_word_delimiter_token and self.word_delimiter_token is not None:
+            processed_chars = list(filter(lambda token: token != self.word_delimiter_token, processed_chars))
+
+        # retrieve offsets
+        char_offsets = None
+        if output_char_offsets:
+            word_delimiter_token_for_offsets = (
+                self.word_delimiter_token if filter_word_delimiter_token is True else None
+            )
+            char_offsets = self._compute_offsets(
+                char_repetitions, chars, self.pad_token, word_delimiter_token=word_delimiter_token_for_offsets
+            )
+
+            if len(char_offsets) != len(processed_chars):
+                raise ValueError(
+                    f""`char_offsets`: {char_offsets} and `processed_tokens`: {processed_chars}""
+                    "" have to be of the same length, but are: `len(offsets)`: ""
+                    f""{len(char_offsets)} and `len(processed_tokens)`: {len(processed_chars)}""
+                )
+
+            # set tokens to correct processed token
+            for i, char in enumerate(processed_chars):
+                char_offsets[i][""char""] = char
+
+        string = "" "".join(processed_chars).strip()
+
+        return {""text"": string, ""char_offsets"": char_offsets}
+        
+def _convert_token_to_id(self, token: str) -> int:
+        """"""Converts a token (str) in an index (integer) using the vocab.""""""
+        return self.encoder.get(token, self.encoder.get(self.unk_token))
+
+def _convert_id_to_token(self, index: int) -> str:
+        """"""Converts an index (integer) in a token (str) using the vocab.""""""
+        result = self.decoder.get(index, self.unk_token)
+        return result","Convert_tokens, get_string_with_offsets, tokens_to_string, _convert_tokens_to_string, calculate_offset_for_tokens, process_Tokens_And_Return_Offsets, decode_Tokens_With_Offsets, decode_tokens, ctc_decode, tokens_to_string, convert_tokens_to_string, detokenize, decode, decode_with_offsets, tokenizer, arrange_tokens, get_char_offset, convert_tokens_to_text, decode_tokens_to_string, process_tokens, process_string_characters, decode_tokens_to_text, process_tokenized_output, convert_tokens_to_text, process_and_decode_tokens, process_tokens_with_offsets, decode_tokens, get_text_and_char_offsets, filter_tokens, _tokenization, decode_token, decode_tokens, parse_tokens, decode_tokens, uniqueIdentifier
+"
+10,"def python5(parser: ArgumentParser):
+        """"""
+        Args:
+            parser: Root parser to register command-specific arguments
+        """"""
+        train_parser = parser.add_parser(""train"", help=""CLI tool to train a model on a task."")
+
+        train_parser.add_argument(
+            ""--train_data"",
+            type=str,
+            required=True,
+            help=""path to train (and optionally evaluation) dataset as a csv with tab separated labels and sentences."",
+        )
+        train_parser.add_argument(
+            ""--column_label"", type=int, default=0, help=""Column of the dataset csv file with example labels.""
+        )
+        train_parser.add_argument(
+            ""--column_text"", type=int, default=1, help=""Column of the dataset csv file with example texts.""
+        )
+        train_parser.add_argument(
+            ""--column_id"", type=int, default=2, help=""Column of the dataset csv file with example ids.""
+        )
+        train_parser.add_argument(
+            ""--skip_first_row"", action=""store_true"", help=""Skip the first row of the csv file (headers).""
+        )
+
+        train_parser.add_argument(""--validation_data"", type=str, default="""", help=""path to validation dataset."")
+        train_parser.add_argument(
+            ""--validation_split"",
+            type=float,
+            default=0.1,
+            help=""if validation dataset is not provided, fraction of train dataset to use as validation dataset."",
+        )
+
+        train_parser.add_argument(""--output"", type=str, default=""./"", help=""path to saved the trained model."")
+
+        train_parser.add_argument(
+            ""--task"", type=str, default=""text_classification"", help=""Task to train the model on.""
+        )
+        train_parser.add_argument(
+            ""--model"", type=str, default=""google-bert/bert-base-uncased"", help=""Model's name or path to stored model.""
+        )
+        train_parser.add_argument(""--train_batch_size"", type=int, default=32, help=""Batch size for training."")
+        train_parser.add_argument(""--valid_batch_size"", type=int, default=64, help=""Batch size for validation."")
+        train_parser.add_argument(""--learning_rate"", type=float, default=3e-5, help=""Learning rate."")
+        train_parser.add_argument(""--adam_epsilon"", type=float, default=1e-08, help=""Epsilon for Adam optimizer."")
+        train_parser.set_defaults(func=train_command_factory)
+
+	def run(self):
+        if self.framework == ""tf"":
+            return self.run_tf()
+        return self.run_torch()
+
+def run_torch(self):
+        raise NotImplementedError
+
+def train_command_factory(args: Namespace):
+    """"""
+    Factory function used to instantiate training command from provided command line arguments.
+    Returns: TrainCommand
+    """"""
+    return TrainCommand(args)","register_subcommand, set_up_parser_training, train_parser, train_with_cli_command, start_training_with_cli, setup_Training_Arguments, add_train_arguments, register_train_command, setup_train_parser, configure_train_parser, define_train_cli, add_training_cli_arguments, trainnerFactory, register_command_specific_arguments, train_config, buildTrainParser, register_train_cli, train_argument_parser, setup_train_arguments, add_training_arguments, register_parser, configure_parser, add_train_arguments, add_arguments_to_parser, trainer_cli_parser, _train_parser, configure_parser, setup_train_parser, train_model, setup_train_parser, trainModel
+"
+11,"function js1(threadId, value, transferList, timeout) {
+  if (typeof transferList === 'number' && typeof timeout === 'undefined') {
+    timeout = transferList;
+    transferList = [];
+  }
+  if (typeof timeout !== 'undefined') {
+    validateNumber(timeout, 'timeout', 0);
+  }
+  if (threadId === currentThreadId) {
+    throw new ERR_WORKER_MESSAGING_SAME_THREAD();
+  }
+  const memory = new SharedArrayBuffer(WORKER_MESSAGING_SHARED_DATA);
+  const status = new Int32Array(memory);
+  const promise = AtomicsWaitAsync(status, WORKER_MESSAGING_STATUS_INDEX, 0, timeout).value;
+  const message = {
+    type: messageTypes.SEND_MESSAGE_TO_WORKER,
+    source: currentThreadId,
+    destination: threadId,
+    value,
+    memory,
+    transferList,
+  };
+  if (isMainThread) {
+    handleMessageFromThread(message);
+  } else {
+    mainThreadPort.postMessage(message, transferList);
+  }
+  const response = await promise;
+  if (response === 'timed-out') {
+    throw new ERR_WORKER_MESSAGING_TIMEOUT();
+  } else if (status[WORKER_MESSAGING_RESULT_INDEX] === WORKER_MESSAGING_RESULT_NO_LISTENERS) {
+    throw new ERR_WORKER_MESSAGING_FAILED();
+  } else if (status[WORKER_MESSAGING_RESULT_INDEX] === WORKER_MESSAGING_RESULT_LISTENER_ERROR) {
+    throw new ERR_WORKER_MESSAGING_ERRORED();
+  }
+}
+
+function destroyMainThreadPort(threadId) {
+  const unregistrationMessage = {
+    type: messageTypes.UNREGISTER_MAIN_THREAD_PORT,
+    threadId,
+  };
+
+  if (isMainThread) {
+    handleMessageFromThread(unregistrationMessage);
+  } else {
+    mainThreadPort.postMessage(unregistrationMessage);
+  }
+}","check_thread, sendMessageToWorker, sendMsgToWorker, relayMessageToThread, sendMessageViaWorker, sendMessageToThreadWithValue, postMessageToWorkerThread, sendMessageToWorker, sendMessageToWorker, postWorkerMessage, threadMessageWithTimeout, dispatchWorkerMessage, sendThreadMessage, workerMessageHandler, threadPoolManager, checkThread, transferMessage, sendMessageFromThread, sendMessageToWorker, sendMessage, SendAsyncMessage, sendMessageToWorker, communicateWithWorker, sendMessageToWorker, processMessage, sendMessageToThread, sendMessage, SendMessageToThread, ThreadHandler, sendMessage, sendMsgToWorker, manage_thread, postMessageToThread, spawnNewWorker"
+12,"function js2(str) {
+  // Skip only HTTP whitespace from start
+  let position = SafeStringPrototypeSearch(str, END_BEGINNING_WHITESPACE);
+  const typeEnd = StringPrototypeIndexOf(str, SOLIDUS, position);
+  const trimmedType = typeEnd === -1 ?
+    StringPrototypeSlice(str, position) :
+    StringPrototypeSlice(str, position, typeEnd);
+  const invalidTypeIndex = SafeStringPrototypeSearch(trimmedType,
+                                                     NOT_HTTP_TOKEN_CODE_POINT);
+  if (trimmedType === '' || invalidTypeIndex !== -1 || typeEnd === -1) {
+    throw new ERR_INVALID_MIME_SYNTAX('type', str, invalidTypeIndex);
+  }
+  position = typeEnd + 1;
+  const type = toASCIILower(trimmedType);
+  const subtypeEnd = StringPrototypeIndexOf(str, SEMICOLON, position);
+  const rawSubtype = subtypeEnd === -1 ?
+    StringPrototypeSlice(str, position) :
+    StringPrototypeSlice(str, position, subtypeEnd);
+  position += rawSubtype.length;
+  if (subtypeEnd !== -1) {
+    position += 1;
+  }
+  const trimmedSubtype = StringPrototypeSlice(
+    rawSubtype,
+    0,
+    SafeStringPrototypeSearch(rawSubtype, START_ENDING_WHITESPACE));
+  const invalidSubtypeIndex = SafeStringPrototypeSearch(trimmedSubtype,
+                                                        NOT_HTTP_TOKEN_CODE_POINT);
+  if (trimmedSubtype === '' || invalidSubtypeIndex !== -1) {
+    throw new ERR_INVALID_MIME_SYNTAX('subtype', str, invalidSubtypeIndex);
+  }
+  const subtype = toASCIILower(trimmedSubtype);
+  return [
+    type,
+    subtype,
+    position,
+  ];
+}
+
+function removeBackslashes(str) {
+  let ret = '';
+  let i;
+  for (i = 0; i < str.length - 1; i++) {
+    const c = str[i];
+    if (c === '\\') {
+      i++;
+      ret += str[i];
+    } else {
+      ret += c;
+    }
+  }
+  if (i === str.length - 1) {
+    ret += str[i];
+  }
+  return ret;
+}","FindType, getMimeType, prepareHTTPMessageForParsing, parseMimeTypeAndSubtype, parseMimeType, validateAndParseMimeType, extractMimeType, decodeMimeType, MimeTypeParser, httpParser, makeSafeString, cleanedUrlHeuristicType, extractContentType, getContentType, extractMimeType, parseMimeType, transformCharacters, transfromString, processString, extractMimeType, parseMIMEType, parseMimeType, getTextAttributes, cleanString, typoCheck, parseStr, parseMimeType, parse_http_request, ParseMimeType, urlFrom, extractUrlFrom"
+13,"function js3(
+  current: Fiber,
+  workInProgress: Fiber,
+  primaryChildren: $FlowFixMe,
+  fallbackChildren: $FlowFixMe,
+  renderLanes: Lanes,
+) {
+  const fiberMode = workInProgress.mode;
+  const primaryChildProps: OffscreenProps = {
+    mode: 'visible',
+    children: primaryChildren,
+  };
+  const primaryChildFragment = mountWorkInProgressOffscreenFiber(
+    primaryChildProps,
+    fiberMode,
+    NoLanes,
+  );
+  const fallbackChildFragment = createFiberFromFragment(
+    fallbackChildren,
+    fiberMode,
+    renderLanes,
+    null,
+  );
+  fallbackChildFragment.flags |= Placement;
+
+  primaryChildFragment.return = workInProgress;
+  fallbackChildFragment.return = workInProgress;
+  primaryChildFragment.sibling = fallbackChildFragment;
+  workInProgress.child = primaryChildFragment;
+
+  if (disableLegacyMode || (workInProgress.mode & ConcurrentMode) !== NoMode) {
+    reconcileChildFibers(workInProgress, current.child, null, renderLanes);
+  }
+
+  return fallbackChildFragment;
+}
+
+function mountDehydratedSuspenseComponent(
+  workInProgress: Fiber,
+  suspenseInstance: SuspenseInstance,
+  renderLanes: Lanes,
+): null | Fiber {
+  if (isSuspenseInstanceFallback(suspenseInstance)) {.
+    workInProgress.lanes = laneToLanes(
+      enableHydrationLaneScheduling ? DefaultLane : DefaultHydrationLane,
+    );
+  } else {
+    workInProgress.lanes = laneToLanes(OffscreenLane);
+  }
+  return null;
+}","ManageComponents, mountPrimaryChildrenAndGetFallback, mountPrimaryAndGetFallback, setupChildForWorkInProgress, processFiberChildFragments, mountSuspenseFallback, createSuspenseFallbackFragment, mountSuspenseOffscreenFibers, setupSuspenseFallbackChildren, initializeSuspenseFallback, initializeScenario, CheckChildFragment, onScreenWorkScheduler, buildFallbackChild, mountSuspenseFallbackChildren, configureNodes, updateSuspenseBoundary, mountSuspenseComponentFallback, MountSuspenseFragments, getFallbackChildFragment, mountFiberLanes, renderFiber, setupChildWithFallback, reconcileWithFallback, analyse_fragment, createSuspenseFragments, processCommunication
+"
+14,"function js4(socket, info) {
+  if (!info.OCSPRequest || !socket.server)
+    return requestOCSPDone(socket);
+  let ctx = socket._handle.sni_context;
+  if (!ctx) {
+    ctx = socket.server._sharedCreds;
+    if (!ctx)
+      return requestOCSPDone(socket);
+  }
+  if (ctx.context)
+    ctx = ctx.context;
+
+  if (socket.server.listenerCount('OCSPRequest') === 0) {
+    return requestOCSPDone(socket);
+  }
+  let once = false;
+  const onOCSP = (err, response) => {
+    debug('server OCSPRequest done', 'handle?', !!socket._handle, 'once?', once,
+          'response?', !!response, 'err?', err);
+    if (once)
+      return socket.destroy(new ERR_MULTIPLE_CALLBACK());
+    once = true;
+
+    if (err)
+      return socket.destroy(err);
+
+    if (socket._handle === null)
+      return socket.destroy(new ERR_SOCKET_CLOSED());
+
+    if (response)
+      socket._handle.setOCSPResponse(response);
+    requestOCSPDone(socket);
+  };
+  debug('server oncertcb emit OCSPRequest');
+  socket.server.emit('OCSPRequest',
+                     ctx.getCertificate(),
+                     ctx.getIssuer(),
+                     onOCSP);
+}
+
+function onhandshakedone() {
+  debug('server onhandshakedone');
+  const owner = this[owner_symbol];
+  assert(owner._tlsOptions.isServer);
+  if (owner._newSessionPending) {
+    owner._securePending = true;
+    return;
+  }
+  owner._finishInit();
+}","send_socket_request, doOCSPRequest, performOCSPRequest, checkOCSPOnSocket, processOCSPRequest, handleOCSPRequest, processOCSPRequest, emitOCSPRequest, performOCSPCheck, validateOCSPForSocket, openSocket, checkInfo, getOcspRequest, socketResponse, handleOCSPRequest, HandleServerOCSPRequest, establishSocketConnection, handleOCSPRequest, handleCertificateValidationRequest, handleOCSPRequest, handleSocketServer, WaitForOCSPRequest, socketHandler, handleOCSPRequest, handleOCSPRequest, start_server, handleOCSPRequest, processRequest
+"
+15,"function js5() {
+  settingsBuffer[IDX_SETTINGS_FLAGS] = 0;
+  settingsBuffer[IDX_SETTINGS_FLAGS + 1] = 0; 
+  binding.refreshDefaultSettings();
+  const holder = { __proto__: null };
+
+  const flags = settingsBuffer[IDX_SETTINGS_FLAGS];
+  if ((flags & (1 << IDX_SETTINGS_HEADER_TABLE_SIZE)) ===
+      (1 << IDX_SETTINGS_HEADER_TABLE_SIZE)) {
+    holder.headerTableSize =
+      settingsBuffer[IDX_SETTINGS_HEADER_TABLE_SIZE];
+  }
+  if ((flags & (1 << IDX_SETTINGS_ENABLE_PUSH)) ===
+      (1 << IDX_SETTINGS_ENABLE_PUSH)) {
+    holder.enablePush =
+      settingsBuffer[IDX_SETTINGS_ENABLE_PUSH] === 1;
+  }
+  if ((flags & (1 << IDX_SETTINGS_INITIAL_WINDOW_SIZE)) ===
+      (1 << IDX_SETTINGS_INITIAL_WINDOW_SIZE)) {
+    holder.initialWindowSize =
+      settingsBuffer[IDX_SETTINGS_INITIAL_WINDOW_SIZE];
+  }
+  if ((flags & (1 << IDX_SETTINGS_MAX_FRAME_SIZE)) ===
+      (1 << IDX_SETTINGS_MAX_FRAME_SIZE)) {
+    holder.maxFrameSize =
+      settingsBuffer[IDX_SETTINGS_MAX_FRAME_SIZE];
+  }
+  if ((flags & (1 << IDX_SETTINGS_MAX_CONCURRENT_STREAMS)) ===
+      (1 << IDX_SETTINGS_MAX_CONCURRENT_STREAMS)) {
+    holder.maxConcurrentStreams =
+      settingsBuffer[IDX_SETTINGS_MAX_CONCURRENT_STREAMS];
+  }
+  if ((flags & (1 << IDX_SETTINGS_MAX_HEADER_LIST_SIZE)) ===
+      (1 << IDX_SETTINGS_MAX_HEADER_LIST_SIZE)) {
+    holder.maxHeaderListSize = holder.maxHeaderSize =
+      settingsBuffer[IDX_SETTINGS_MAX_HEADER_LIST_SIZE];
+  }
+  if ((flags & (1 << IDX_SETTINGS_ENABLE_CONNECT_PROTOCOL)) ===
+      (1 << IDX_SETTINGS_ENABLE_CONNECT_PROTOCOL)) {
+    holder.enableConnectProtocol =
+      settingsBuffer[IDX_SETTINGS_ENABLE_CONNECT_PROTOCOL] === 1;
+  }
+  if (settingsBuffer[IDX_SETTINGS_FLAGS + 1]) holder.customSettings = addCustomSettingsToObj();
+  return holder;
+}
+
+function getSettings(session, remote) {
+  if (remote)
+    session.remoteSettings();
+  else
+    session.localSettings();
+  const toRet = {
+    headerTableSize: settingsBuffer[IDX_SETTINGS_HEADER_TABLE_SIZE],
+    enablePush: !!settingsBuffer[IDX_SETTINGS_ENABLE_PUSH],
+    initialWindowSize: settingsBuffer[IDX_SETTINGS_INITIAL_WINDOW_SIZE],
+    maxFrameSize: settingsBuffer[IDX_SETTINGS_MAX_FRAME_SIZE],
+    maxConcurrentStreams: settingsBuffer[IDX_SETTINGS_MAX_CONCURRENT_STREAMS],
+    maxHeaderListSize: settingsBuffer[IDX_SETTINGS_MAX_HEADER_LIST_SIZE],
+    maxHeaderSize: settingsBuffer[IDX_SETTINGS_MAX_HEADER_LIST_SIZE],
+    enableConnectProtocol:
+      !!settingsBuffer[IDX_SETTINGS_ENABLE_CONNECT_PROTOCOL],
+  };
+  if (settingsBuffer[IDX_SETTINGS_FLAGS + 1]) toRet.customSettings = addCustomSettingsToObj();
+  return toRet;
+}","set_IOX_settings, applySettings, getSettingsHolder, convertSettingsToJson, getJsonFromSettings, applyConfigurationSettings, parseHttp2Settings, buildHttp2SettingsObject, getDefaultHttp2Settings, extractHttp2Settings, loadHttp2Settings, createSession, sessionFactory, setBuffer, getHolder, loadSettings, parseHttp2Settings, configureHolder, InitializeHttp2Settings, InitializeDefaultHttpTwoSettings, processSettingsBuffer, getHolderValue, setSettings, bufferCheck, parseSettingBuffer, handleSettingsFrame, build_holder, applyHttp2Settings, configuredObject"
