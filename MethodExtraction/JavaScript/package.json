@@ -23,6 +23,7 @@
     "@anthropic-ai/sdk": "^0.18.0",
     "csv-parser": "^3.2.0",
     "csv-writer": "^1.6.0",
+    "dotenv": "^16.4.5",
     "gpt-3-encoder": "^1.1.4",
     "openai": "^5.8.3",
     "tiktoken-node": "^0.0.7"

@@ -6,6 +6,7 @@ const path = require('path');
 const csv = require('csv-parser');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const Anthropic = require('@anthropic-ai/sdk');
+require('dotenv').config();
 let encoding;
 
 // Try to use tiktoken-node, fallback to gpt-3-encoder
@@ -20,12 +21,12 @@ try {
   }
 }
 
-// Set your Anthropic API key
-const ANTHROPIC_API_KEY = "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";
+// Load Anthropic API key from environment (.env or shell)
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const CLAUDE_MODEL = "claude-3-7-sonnet-20250219";
 
 if (!ANTHROPIC_API_KEY) {
-  console.error('Please set your ANTHROPIC_API_KEY environment variable.');
+  console.error('ANTHROPIC_API_KEY is not set. Please add it to your .env file or environment.');
   process.exit(1);
 }
 

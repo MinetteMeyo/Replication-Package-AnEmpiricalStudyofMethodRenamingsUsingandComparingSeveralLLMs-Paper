@@ -6,6 +6,7 @@ const path = require('path');
 const csv = require('csv-parser');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const axios = require('axios');
+require('dotenv').config();
 let encoding;
 
 // Try to use tiktoken-node, fallback to gpt-3-encoder
@@ -20,13 +21,13 @@ try {
   }
 }
 
-// Set your Llama API key
-const LLAMA_API_KEY = "0a62aec484719004430f8b114eab5bee96b89be9b33b975b3da5b8afbea6af49";
+// Load Llama API key from environment (.env or shell)
+const LLAMA_API_KEY = process.env.LLAMA_API_KEY;
 const LLAMA_MODEL = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8";
 const LLAMA_API_URL = "https://api.together.xyz/v1/chat/completions";
 
 if (!LLAMA_API_KEY) {
-  console.error('Please set your LLAMA_API_KEY environment variable.');
+  console.error('LLAMA_API_KEY is not set. Please add it to your .env file or environment.');
   process.exit(1);
 }
 

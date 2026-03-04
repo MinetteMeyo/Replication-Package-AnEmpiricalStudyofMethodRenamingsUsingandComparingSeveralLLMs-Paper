@@ -6,6 +6,7 @@ const path = require('path');
 const csv = require('csv-parser');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const OpenAI = require('openai');
+require('dotenv').config();
 let encoding;
 
 // Try to use tiktoken-node, fallback to gpt-3-encoder
@@ -20,12 +21,10 @@ try {
   }
 }
 
-// Set your OpenAI API key via environment variable
-
-// Manually set your OpenAI API key (as in the Python example)
-const OPENAI_API_KEY = "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";
+// Load OpenAI API key from environment (.env or shell)
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 if (!OPENAI_API_KEY) {
-  console.error('Please set your OpenAI_API_KEY environment variable.');
+  console.error('OPENAI_API_KEY is not set. Please add it to your .env file or environment.');
   process.exit(1);
 }
 

@@ -1,12 +1,16 @@
 import csv
 import time
+import os
 import openai
 import tiktoken
 import re
 from openai.error import RateLimitError  # Ensure this is imported
 
-# Manually set your OpenAI API key
-openai.api_key = "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"
+# Load OpenAI API key from environment (.env or shell)
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    raise RuntimeError("OPENAI_API_KEY is not set. Please configure it in your environment or .env loader.")
+openai.api_key = OPENAI_API_KEY
 
 # Define the retry wrapper here
 def call_openai_with_retry(messages, max_retries=5):

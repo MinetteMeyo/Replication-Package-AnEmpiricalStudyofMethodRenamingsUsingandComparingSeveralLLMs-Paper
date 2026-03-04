@@ -5,8 +5,10 @@ import os
 import anthropic
 from anthropic import Anthropic
 
-ANTHROPIC_API_KEY = "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"
-
+# Load Anthropic API key from environment (.env or shell)
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+if not ANTHROPIC_API_KEY:
+    raise RuntimeError("ANTHROPIC_API_KEY is not set. Please configure it in your environment or .env loader.")
 
 # Initialize the Anthropic client with explicit API key
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)

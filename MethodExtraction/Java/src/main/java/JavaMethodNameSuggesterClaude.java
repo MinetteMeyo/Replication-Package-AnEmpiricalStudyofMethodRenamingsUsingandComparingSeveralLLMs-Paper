@@ -12,7 +12,8 @@ import com.google.gson.*;
 
 public class JavaMethodNameSuggesterClaude {
 
-    private static final String CLAUDE_API_KEY = "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";
+    // Load Claude API key from environment (.env or shell)
+    private static final String CLAUDE_API_KEY = System.getenv("ANTHROPIC_API_KEY");
     private static final int RESPONSE_TOKENS = 300;
     private static final HttpClient httpClient = HttpClient.newHttpClient();
 
@@ -83,6 +84,9 @@ public class JavaMethodNameSuggesterClaude {
     }
 
     private static List<String> callClaudeApi(String methodBody, String context) {
+        if (CLAUDE_API_KEY == null || CLAUDE_API_KEY.isEmpty()) {
+            throw new IllegalStateException("ANTHROPIC_API_KEY is not set. Please configure it in your environment or .env loader.");
+        }
         try {
             String prompt = String.format("""
                 Method body (with method name anonymized):

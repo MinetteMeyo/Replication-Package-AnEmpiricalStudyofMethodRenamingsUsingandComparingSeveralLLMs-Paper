@@ -1,11 +1,15 @@
 import csv
 import time
+import os
 import requests
 import tiktoken
 import re
 
 # ========== CONFIGURATION ==========
-API_KEY = "0a62aec484719004430f8b114eab5bee96b89be9b33b975b3da5b8afbea6af49"
+# Load LLaMA API key from environment (.env or shell)
+API_KEY = os.getenv("LLAMA_API_KEY")
+if not API_KEY:
+    raise RuntimeError("LLAMA_API_KEY is not set. Please configure it in your environment or .env loader.")
 MODEL_NAME = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"
 
 INPUT_CSV = "/Users/durjoy/Documents/Lab CSSE/Result_files/Python/random_methods_python.csv"

@@ -11,7 +11,8 @@ import com.opencsv.exceptions.CsvValidationException;
 
 public class JavaMethodNameSuggester {
 
-    private static final String OPENAI_API_KEY = "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"; // Your key
+    // Load OpenAI API key from environment (.env or shell)
+    private static final String OPENAI_API_KEY = System.getenv("OPENAI_API_KEY");
     private static final int MAX_TOKENS = 16384;
     private static final int RESPONSE_TOKENS = 300;
     private static final int PROMPT_TOKENS = 100;
@@ -86,6 +87,9 @@ public class JavaMethodNameSuggester {
     }
 
     private static List<String> callOpenAI(String methodBody, String context) {
+        if (OPENAI_API_KEY == null || OPENAI_API_KEY.isEmpty()) {
+            throw new IllegalStateException("OPENAI_API_KEY is not set. Please configure it in your environment or .env loader.");
+        }
         OpenAiService service = new OpenAiService(OPENAI_API_KEY);
 
         String anonymizedBody = methodBody.replaceAll(

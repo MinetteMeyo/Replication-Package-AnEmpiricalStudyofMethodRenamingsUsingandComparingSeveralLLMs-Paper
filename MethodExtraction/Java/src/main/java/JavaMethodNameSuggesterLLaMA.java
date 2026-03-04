@@ -11,7 +11,8 @@ import com.opencsv.exceptions.CsvValidationException;
 
 public class JavaMethodNameSuggesterLLaMA {
 
-    private static final String LLAMA_API_KEY = "0a62aec484719004430f8b114eab5bee96b89be9b33b975b3da5b8afbea6af49";
+    // Load Llama API key from environment (.env or shell)
+    private static final String LLAMA_API_KEY = System.getenv("LLAMA_API_KEY");
     private static final int RESPONSE_TOKENS = 300;
     private static final int MAX_TOKENS = 8192;
     private static final HttpClient httpClient = HttpClient.newHttpClient();
@@ -78,6 +79,9 @@ public class JavaMethodNameSuggesterLLaMA {
     }
 
     private static List<String> callLlamaApiWithRetry(String methodBody, String context) {
+        if (LLAMA_API_KEY == null || LLAMA_API_KEY.isEmpty()) {
+            throw new IllegalStateException("LLAMA_API_KEY is not set. Please configure it in your environment or .env loader.");
+        }
         String prompt = String.format("""
             Method body (with method name anonymized):
             %s
