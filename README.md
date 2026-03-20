@@ -5,13 +5,13 @@ This repository is a **research project** that evaluates the impact of large lan
 
 The overall workflow is:
 
-- **Select GitHub repositories with specific characteristics**: From the defined characteristics, select 30 repos, 10 each in Java, Python, and JavaScript (JS).
-- **Randomly extract 15 methods (signature + body implementation), five each in Java, Python, and JS from the selected methods**: random extraction of methods and storage of the resulted file.
-- **Extract methods from real GitHub projects** (multi-language AST / parser–based extraction).
-- **Human developers method name suugestions:**: Submit the extracted method body implementations to human developers to suggest names through Survey 1
+- **Select GitHub repositories with specific characteristics**: From the defined criteria, select 30 repositories, 10 each in Java, Python, and JavaScript (JS).
+- **Randomly extract 15 methods**: randomly sample 15 methods (signature + body implementation), five each in Java, Python, and JS from the selected repositories and store the output result in a file
+- **Extract method implementations from real selected methods**: multi-language AST / parser–based extraction
+- **Human developers method name suugestions:**: Submit the extracted method body implementations to human developers to suggest names via Survey 1
 - **LLMs method name suggestions**: Submit the extracted method body implementations to the three LLMs for method name suggestions through prompting
-- **Expert ranking**:Submit the extracted method body implementations with all suggested method names to expert developers to rank the names from most to least appropriate using a Lickert scale
-- **Analyze the results**: Statistical test to answer the three research questions RQ1, RQ2, RQ3
+- **Expert ranking**:Submit the extracted method body implementations alongside all suggested method names to expert developers, who will rank them from most to least appropriate using a Lickert scale
+- **Analyze the results**: Apply statistical test to answer the three research questions RQ1, RQ2, and RQ3
 
 ---
 
