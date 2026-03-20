@@ -45,7 +45,7 @@ Repository Structure
 
 - `Algorithm/` and `AnalyzingData/`  
   - `Algorithm/`: select two method names among the 23 suggested names by human developers using hierachical clustering
-  - `AnalyzingData/`: apply the selected statistical test to the expert ranking data for each research question
+  - `AnalyzingData/`: apply the selected statistical test to the expert ranking data for each research question (RQ1, RQ2, and RQ3)
 
 ---
 
@@ -180,14 +180,8 @@ Important Notes
 ---
 
 
-### Human developers method name suugestions
-Survey 1 (questions and answers) is accessible [here](https://forms.gle/474pdsPGGbhoywBy6).
-- **LLMs method name suggestions**: Submit the extracted method body implementations to the three LLMs for method name suggestions through prompting
-- **Expert ranking**:Submit the extracted method body implementations with all suggested method names to expert developers to rank the names from most to least appropriate using a Lickert scale
-- **Analyze the results**: Statistical test to answer the three research questions RQ1, RQ2, RQ3
-
-
-
+### Human developers method name suggestions and experts ranking results
+Survey 1 and Survey 2 questions and answers are accessible [here](https://drive.google.com/drive/folders/1zb5eCZ6lSQ-VjXH4JzBdCcDjpVQzB1p_?usp=sharing)
 
 
 Contributing
