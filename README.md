@@ -44,8 +44,8 @@ Repository Structure
   - LLMs currently used include **GPT‑4o, Claude (Sonnet), LLaMA (Llama‑4‑Maverick)** and similar.
 
 - `Algorithm/` and `AnalyzingData/`  
-  -  
-  - 
+  - `Algorithm/`: select two method names among the 23 suggested names by human developers using hierachical clustering
+  - `AnalyzingData/`: apply the selected statistical test to the expert ranking data for each research question
 
 ---
 
