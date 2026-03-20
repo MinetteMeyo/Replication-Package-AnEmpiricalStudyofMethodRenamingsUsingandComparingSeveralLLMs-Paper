@@ -181,7 +181,7 @@ Important Notes
 
 
 ### Human developers method name suggestions and experts ranking results
-Survey 1 and Survey 2 questions and answers are accessible [here](https://drive.google.com/drive/folders/1zb5eCZ6lSQ-VjXH4JzBdCcDjpVQzB1p_?usp=sharing)
+Survey 1 and Survey 2 questions and answers are accessible [here](https://drive.google.com/drive/folders/1zb5eCZ6lSQ-VjXH4JzBdCcDjpVQzB1p_?usp=drive_link)
 
 
 Contributing
