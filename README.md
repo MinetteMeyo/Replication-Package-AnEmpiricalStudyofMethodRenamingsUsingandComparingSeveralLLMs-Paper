@@ -18,34 +18,34 @@ The overall workflow is:
 Repository Structure
 --------------------
 
-- `GitHubRepoSelection/`  
-  - Contains the notebook `Github repo selection.ipynb`.  
+- [`GitHubRepoSelection/`](GitHubRepoSelection/)  
+  - Contains the notebook [`Github repo selection.ipynb`](GitHubRepoSelection/Github%20repo%20selection.ipynb).  
   - Used to select candidate GitHub repositories by language (Java / Python / JavaScript), with filters on stars, forks, project size, and heuristics to exclude tutorial / documentation repositories.
 
-- `MethodExtraction/`  
+- [`MethodExtraction/`](MethodExtraction/)  
   - **Core code directory** that extracts methods from the selected repositories and calls LLMs for method name suggestions.  
   - It is organized by language :
-    - **Python**: e.g. `Python/main.py`  
+    - **Python**: e.g. [`Python/main.py`](MethodExtraction/Python/main.py)  
       - Uses the built‑in Python `ast` module for AST parsing.  
       - Filters methods by length (target ≈ 50 lines with ±20 line tolerance), skipping test methods and magic methods.  
-      - LLM caller scripts: `LLMApiCallGpt.py`, `LLMApiCallClaude.py`, `LLMApiCallLlama.py`, etc.  
-    - **JavaScript**: e.g. `JavaScript/javascript_method_parser.js`  
+      - LLM caller scripts: [`LLMApiCallGpt.py`](MethodExtraction/Python/LLMApiCallGpt.py), [`LLMApiCallClaude.py`](MethodExtraction/Python/LLMApiCallClaude.py), [`LLMApiCallLlama.py`](MethodExtraction/Python/LLMApiCallLlama.py), etc.  
+    - **JavaScript**: e.g. [`JavaScript/javascript_method_parser.js`](MethodExtraction/JavaScript/javascript_method_parser.js)  
       - Uses Acorn JS parser to extract function declarations, function expressions, arrow functions, and class methods.  
-      - Name suggestion scripts: `gpt4o_method_name_suggester.js`, `claude_method_name_suggester.js`, `llama_method_name_suggester.js`.  
-    - **Java**: e.g. `Java/JavaMethodExtractor.java`  
+      - Name suggestion scripts: [`gpt4o_method_name_suggester.js`](MethodExtraction/JavaScript/gpt4o_method_name_suggester.js), [`claude_method_name_suggester.js`](MethodExtraction/JavaScript/claude_method_name_suggester.js), [`llama_method_name_suggester.js`](MethodExtraction/JavaScript/llama_method_name_suggester.js).  
+    - **Java**: e.g. [`Java/JavaMethodExtractor.java`](MethodExtraction/Java/src/main/java/JavaMethodExtractor.java)  
       - Uses ANTLR4 + a Java 20 grammar for parsing and method extraction.  
-      - Name suggestion implementations: `JavaMethodNameSuggester.java`, `JavaMethodNameSuggesterClaude.java`, `JavaMethodNameSuggesterLLaMA.java`.
+      - Name suggestion implementations: [`JavaMethodNameSuggester.java`](MethodExtraction/Java/src/main/java/JavaMethodNameSuggesterGPT.java), [`JavaMethodNameSuggesterClaude.java`](MethodExtraction/Java/src/main/java/JavaMethodNameSuggesterClaude.java), [`JavaMethodNameSuggesterLLaMA.java`](MethodExtraction/Java/src/main/java/JavaMethodNameSuggesterLLaMA.java).
 
-- `ResultFiles/`  
-  - Stores CSV outputs for extracted methods and LLM suggestions, split into language‑specific subdirectories: `Java/`, `JavaScript/`, `Python/`.  
+- [`ResultFiles/`](ResultFiles/)  
+  - Stores CSV outputs for extracted methods and LLM suggestions, split into language‑specific subdirectories: [`Java/`](ResultFiles/Java/), [`JavaScript/`](ResultFiles/JavaScript/), [`Python/`](ResultFiles/Python/).  
   - For each language you typically find:
     - `random_methods_[language].csv`: random sample of target methods (columns usually include: Fully Qualified Name, File Path, Method Name, Method Body, Line Count, etc.).  
     - `[llm]_suggestedMethodNames_[language].csv`: LLM name suggestions (adds context token counts, context snippets, and one or more suggested names).  
   - LLMs currently used include **GPT‑4o, Claude (Sonnet), LLaMA (Llama‑4‑Maverick)** and similar.
 
-- `Algorithm/` and `AnalyzingData/`  
-  - `Algorithm/`: select two method names among the 23 suggested names by human developers using hierachical clustering
-  - `AnalyzingData/`: apply the selected statistical test to the expert ranking data for each research question (RQ1, RQ2, and RQ3)
+- [`Algorithm/`](Algorithm/) and [`AnalyzingData/`](AnalyzingData/)  
+  - [`Algorithm/`](Algorithm/): select two method names among the 23 suggested names by human developers using hierachical clustering
+  - [`AnalyzingData/`](AnalyzingData/): apply the selected statistical test to the expert ranking data for each research question (RQ1, RQ2, and RQ3)
 
 ---
 
@@ -69,7 +69,7 @@ Workflow for the first three steps / How to Use
 
 ### 2. Selecting GitHub Repositories
 
-- Open and run `GitHubRepoSelection/Github repo selection.ipynb`.  
+- Open and run [`GitHubRepoSelection/Github repo selection.ipynb`](GitHubRepoSelection/Github%20repo%20selection.ipynb).  
 - Configure and execute the notebook to select repositories that satisfy the constraints (language, stars, forks, size, etc.).  
 - Clone the selected repositories locally to a directory that matches the hard‑coded or configured paths used by the extraction scripts.
 
@@ -78,7 +78,7 @@ Workflow for the first three steps / How to Use
 Once the target language repositories are cloned locally, run the language‑specific extraction scripts:
 
 - **Python method extraction**
-  - Go to `MethodExtraction/Python/`.  
+  - Go to [`MethodExtraction/Python/`](MethodExtraction/Python/).  
   - Configure the code root directory (many scripts assume something like `/Users/yourUsername/Documents/Lab/Github_repos/`; you should change this to your own path).  
   - Run:
 
@@ -87,7 +87,7 @@ Once the target language repositories are cloned locally, run the language‑spe
     ```
 
 - **JavaScript method extraction**
-  - Go to `MethodExtraction/JavaScript/`.  
+  - Go to [`MethodExtraction/JavaScript/`](MethodExtraction/JavaScript/).  
   - Install dependencies:
 
     ```bash
@@ -101,7 +101,7 @@ Once the target language repositories are cloned locally, run the language‑spe
     ```
 
 - **Java method extraction**
-  - Go to `MethodExtraction/Java/` (or the corresponding Maven module).  
+  - Go to [`MethodExtraction/Java/`](MethodExtraction/Java/) (or the corresponding Maven module).  
   - Ensure ANTLR4 and Maven configuration are correct, then compile and run:
 
     ```bash
@@ -116,19 +116,19 @@ For all languages, the extraction scripts apply a line‑count filter (≈ 50 li
 After extraction, invoke the language‑ and model‑specific scripts to generate name suggestions. Typical scripts include:
 
 - **Python**
-  - `LLMApiCallGpt.py`
-  - `LLMApiCallClaude.py`
-  - `LLMApiCallLlama.py`
+  - [`LLMApiCallGpt.py`](MethodExtraction/Python/LLMApiCallGpt.py)
+  - [`LLMApiCallClaude.py`](MethodExtraction/Python/LLMApiCallClaude.py)
+  - [`LLMApiCallLlama.py`](MethodExtraction/Python/LLMApiCallLlama.py)
 
 - **JavaScript**
-  - `gpt4o_method_name_suggester.js`
-  - `claude_method_name_suggester.js`
-  - `llama_method_name_suggester.js`
+  - [`gpt4o_method_name_suggester.js`](MethodExtraction/JavaScript/gpt4o_method_name_suggester.js)
+  - [`claude_method_name_suggester.js`](MethodExtraction/JavaScript/claude_method_name_suggester.js)
+  - [`llama_method_name_suggester.js`](MethodExtraction/JavaScript/llama_method_name_suggester.js)
 
 - **Java**
-  - `JavaMethodNameSuggesterGPT.java`
-  - `JavaMethodNameSuggesterClaude.java`
-  - `JavaMethodNameSuggesterLLaMA.java`
+  - [`JavaMethodNameSuggesterGPT.java`](MethodExtraction/Java/src/main/java/JavaMethodNameSuggesterGPT.java)
+  - [`JavaMethodNameSuggesterClaude.java`](MethodExtraction/Java/src/main/java/JavaMethodNameSuggesterClaude.java)
+  - [`JavaMethodNameSuggesterLLaMA.java`](MethodExtraction/Java/src/main/java/JavaMethodNameSuggesterLLaMA.java)
 
 Before running these scripts:
 
