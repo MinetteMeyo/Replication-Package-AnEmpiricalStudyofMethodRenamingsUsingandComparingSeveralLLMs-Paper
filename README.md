@@ -83,6 +83,23 @@ flowchart TD
 - The same method bodies are sent to three LLMs — **GPT‑4o, Claude (Sonnet), and LLaMA (Llama‑4‑Maverick)** — using the caller scripts under [`MethodExtraction/`](MethodExtraction/) (e.g. `LLMApiCallGpt.py`, `claude_method_name_suggester.js`, `JavaMethodNameSuggesterLLaMA.java`).  
 - Output: [`ResultFiles/[Language]/[llm]_suggestedMethodNames_[language].csv`](ResultFiles/), including the prompt context and one or more suggested names per method.
 
+#### How the LLMs are called
+
+Every language (Python, JavaScript, Java) follows the same calling convention, just via a different SDK/HTTP client, so results stay comparable across models and languages:
+
+- **Models used**:
+  - GPT‑4o via the OpenAI API (`model: "gpt-4o"`).
+  - Claude via the Anthropic API (`model: "claude-3-7-sonnet-20250219"`).
+  - LLaMA via TogetherAI's OpenAI‑compatible endpoint (`model: "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"`, `POST https://api.together.xyz/v1/chat/completions`).
+- **Authentication**: each script reads its key from an environment variable (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `LLAMA_API_KEY`) and raises an error if it's missing — no keys are hard‑coded in the repo.
+- **Prompt construction**:
+  1. The method's own name is stripped out of its signature (`def method_name`) so the model can't just echo it back — this is the "name anonymized" step.
+  2. Surrounding code (everything in the file before/after the method) is pulled in as extra **context**, and `tiktoken` (`cl100k_base` encoding) is used to count/truncate that context so the whole prompt fits the model's token budget (context tokens + a fixed prompt‑overhead + a reserved 300‑token response budget).
+  3. A fixed template is sent as a system + user message pair: a system instruction to act as a naming assistant, and a user message containing the anonymized body, the context, and "Provide method name suggestions as a numbered list, no explanations."
+- **Sampling settings**: `temperature = 0.5` and `max_tokens = 300` on every model, so responses stay short, consistent, and only mildly randomized run to run.
+- **Retry handling**: the GPT and LLaMA callers retry with backoff on rate‑limit errors; failures are recorded as `"N/A"` / `"METHOD_NOT_FOUND"` in the output CSV rather than crashing the batch.
+- **Output**: each script iterates row‑by‑row over `random_methods_[language].csv` and appends the model's numbered‑list response (plus context and context‑token count) to `[llm]_suggestedMethodNames_[language].csv`.
+
 ### 5. Select representative name candidates
 - [`Algorithm/identifier_name_selection.py`](Algorithm/identifier_name_selection.py) pools the ~23 human‑ and LLM‑suggested names per method, tokenizes each identifier (camelCase / snake_case aware), and scores it against ground‑truth tokens extracted from the method body.  
 - It builds a Jaccard‑similarity matrix over the proposed names and runs **hierarchical (average‑linkage) clustering**, then picks one exemplar per cluster.  
