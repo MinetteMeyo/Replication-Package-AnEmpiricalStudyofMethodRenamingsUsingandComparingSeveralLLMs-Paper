@@ -49,6 +49,57 @@ Repository Structure
 
 ---
 
+Full Pipeline — How It Works
+-----------------------------
+
+End‑to‑end, the project moves through seven stages, each stage consuming the output of the previous one:
+
+```mermaid
+flowchart TD
+    A["1. Select GitHub repositories"] --> B["2. Extract candidate methods"]
+    B --> C["3. Human developers suggest names (Survey 1)"]
+    B --> D["4. LLMs suggest names (GPT-4o / Claude / LLaMA)"]
+    C --> E["5. Select representative name candidates (clustering)"]
+    D --> E
+    E --> F["6. Expert developers rank all candidates (Survey 2)"]
+    F --> G["7. Statistical analysis (RQ1 / RQ2 / RQ3)"]
+```
+
+### 1. Select GitHub repositories
+- Run the [`Github repo selection.ipynb`](GitHubRepoSelection/Github%20repo%20selection.ipynb) notebook.  
+- It filters candidate repositories by stars, forks, and project size, and excludes tutorial / documentation repos.  
+- Output: **30 repositories** — 10 each for Java, Python, and JavaScript.
+
+### 2. Extract candidate methods
+- The language‑specific extractors in [`MethodExtraction/`](MethodExtraction/) parse the cloned repositories: Python's built‑in `ast` module, the Acorn parser for JavaScript, and an ANTLR4 + Java‑20 grammar for Java.  
+- Methods are filtered by length (≈ 50 lines ± 20), skipping test methods and magic methods, then **15 methods are randomly sampled** (5 per language).  
+- Output: [`ResultFiles/[Language]/random_methods_[language].csv`](ResultFiles/) — signature, file path, method body, and line count for each sampled method.
+
+### 3. Human developers suggest names (Survey 1)
+- The extracted method bodies (with the original name hidden) are shown to human developers, who each propose a name via **Survey 1**.  
+- Results are stored outside this repo — see the [Google Drive link](https://drive.google.com/drive/folders/1zb5eCZ6lSQ-VjXH4JzBdCcDjpVQzB1p_?usp=drive_link) below.
+
+### 4. LLMs suggest names
+- The same method bodies are sent to three LLMs — **GPT‑4o, Claude (Sonnet), and LLaMA (Llama‑4‑Maverick)** — using the caller scripts under [`MethodExtraction/`](MethodExtraction/) (e.g. `LLMApiCallGpt.py`, `claude_method_name_suggester.js`, `JavaMethodNameSuggesterLLaMA.java`).  
+- Output: [`ResultFiles/[Language]/[llm]_suggestedMethodNames_[language].csv`](ResultFiles/), including the prompt context and one or more suggested names per method.
+
+### 5. Select representative name candidates
+- [`Algorithm/identifier_name_selection.py`](Algorithm/identifier_name_selection.py) pools the ~23 human‑ and LLM‑suggested names per method, tokenizes each identifier (camelCase / snake_case aware), and scores it against ground‑truth tokens extracted from the method body.  
+- It builds a Jaccard‑similarity matrix over the proposed names and runs **hierarchical (average‑linkage) clustering**, then picks one exemplar per cluster.  
+- This narrows the candidate pool down to **2 representative names per method**, keeping the next survey manageable.
+
+### 6. Expert developers rank all candidates (Survey 2)
+- The original method name plus the 2 selected candidate names are shown to expert developers, who rank them from most to least appropriate on a **Likert scale** via **Survey 2**.  
+- Results are also available in the [Google Drive link](https://drive.google.com/drive/folders/1zb5eCZ6lSQ-VjXH4JzBdCcDjpVQzB1p_?usp=drive_link).
+
+### 7. Statistical analysis
+- The scripts in [`AnalyzingData/`](AnalyzingData/) consume the expert ranking data to answer the three research questions:
+  - [`RQ1.py`](AnalyzingData/RQ1.py) — Friedman test + Nemenyi post‑hoc, comparing expert‑rated quality across LLMs, human developers, and original method names.
+  - [`RQ2.py`](AnalyzingData/RQ2.py) — Chi‑square test of independence (with Cramér's V effect size) per LLM, checking whether naming quality varies across Java, Python, and JavaScript.
+  - [`RQ3.py`](AnalyzingData/RQ3.py) — Descriptive breakdown of High / Medium / Low quality name suggestions per LLM and per language.
+
+---
+
 Workflow for the first three steps / How to Use
 ---------------------
 
