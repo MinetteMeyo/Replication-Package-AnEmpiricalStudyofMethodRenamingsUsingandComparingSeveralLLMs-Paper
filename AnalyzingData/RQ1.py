@@ -3,9 +3,17 @@ import pandas as pd
 from scipy.stats import friedmanchisquare
 import scikit_posthocs as sp
 
-filename = './raw_method_data.csv'
+# ============================================================
+# LOAD DATA
+# ============================================================
+filename = '/home/minette/0_XP_Refactoring/Code-naming/raw_method_data.csv'
 df = pd.read_csv(filename)
 
+print("✓ Data loaded successfully!\n")
+
+# ============================================================
+# BUILD DATA MATRIX
+# ============================================================
 participants = df['Category'].unique()
 method_ids = df['Method_id'].unique()
 
@@ -20,6 +28,13 @@ for method_id in method_ids:
     data_matrix.append(method_scores)
 
 data = np.array(data_matrix)
+
+# ============================================================
+# FRIEDMAN TEST
+# ============================================================
+print("="*70)
+print("FRIEDMAN TEST (based on Good rankings only)")
+print("="*70)
 
 stat, p_value = friedmanchisquare(*data.T)
 
@@ -37,9 +52,19 @@ else:
     print(f"  ✗ No significant differences detected")
     proceed_posthoc = False
 
+# ============================================================
+# EFFECT SIZE (Kendall's W)
+# ============================================================
+print("\n" + "-"*70)
+print("EFFECT SIZE (Kendall's W)")
+print("-"*70)
+
 n_methods = data.shape[0]
 k_participants = data.shape[1]
 kendall_w = stat / (n_methods * (k_participants - 1))
+
+print(f"\nKendall's W: {kendall_w:.3f}")
+print(f"  (Range: 0 = no agreement, 1 = perfect agreement)")
 
 if kendall_w < 0.1:
     interpretation = "weak"
@@ -47,16 +72,31 @@ elif kendall_w < 0.3:
     interpretation = "moderate"
 else:
     interpretation = "strong"
-  
+    
+print(f"  Interpretation: {interpretation} effect")
+
+# ============================================================
+# NEMENYI POST-HOC
+# ============================================================
 if proceed_posthoc:
+    print("\n" + "="*70)
+    print("NEMENYI POST-HOC TEST - COMPLETE MATRIX")
+    print("="*70)
     
     df_test = pd.DataFrame(data, columns=participants)
     posthoc = sp.posthoc_nemenyi_friedman(df_test)
     
+    print("\nComplete pairwise p-values:")
+    print(posthoc.round(4))
+    
     llms = [c for c in participants if 'Claude' in c or 'GPT' in c or 'Llama' in c]
     humans = [c for c in participants if 'developer' in c]
     original = [c for c in participants if 'original' in c]
-  
+    
+    print("\n" + "="*70)
+    print("SIGNIFICANT COMPARISONS (p < 0.05)")
+    print("="*70)
+    
     print("\nLLMs vs Humans:")
     for llm in llms:
         for human in humans:
@@ -72,3 +112,22 @@ if proceed_posthoc:
             print(f"  {sig} {llm:30s} vs {orig:30s}: p = {p:.4f}")
 else:
     print("\n⚠ Post-hoc test skipped (Friedman test not significant)")
+
+# ============================================================
+# SUMMARY
+# ============================================================
+print("\n" + "="*70)
+print("SUMMARY (Good rankings only)")
+print("="*70)
+
+summary = df.groupby('Category')[['Good', 'Avg', 'Bad']].sum()
+summary['Total'] = summary['Good'] + summary['Avg'] + summary['Bad']
+summary['Good %'] = (summary['Good'] / summary['Total'] * 100).round(1)
+
+for participant in participants:
+    good = summary.loc[participant, 'Good']
+    total = summary.loc[participant, 'Total']
+    pct = summary.loc[participant, 'Good %']
+    print(f"{participant:30s}: {good:3.0f}/{total:.0f} ({pct:5.1f}% Good)")
+
+print("="*70)
