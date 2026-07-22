@@ -2,8 +2,23 @@ import numpy as np
 import pandas as pd
 from scipy.stats import chi2_contingency
 
-filename = './raw_method_data.csv'
+# ============================================================
+# LOAD DATA
+# ============================================================
+filename = '/home/minette/0_XP_Refactoring/Code-naming/raw_method_data.csv'
 df = pd.read_csv(filename)
+
+print("✓ Data loaded successfully!\n")
+
+# ============================================================
+# RQ3: DOES EACH LLM'S PERFORMANCE VARY ACROSS LANGUAGES?
+# ============================================================
+print("="*70)
+print("RQ3: How does LLM performance vary across programming languages?")
+print("="*70)
+print("\nMethod: Chi-Square Test of Independence")
+print("Separate test for each LLM across Java, Python, JavaScript")
+print("="*70)
 
 llms = ['Claude Sonnet 4.5', 'GPT 5', 'Llama 4']
 languages = ['Java', 'Python', 'JavaScript']
@@ -11,6 +26,9 @@ languages = ['Java', 'Python', 'JavaScript']
 results = []
 
 for llm in llms:
+    print(f"\n{'='*70}")
+    print(f"LLM: {llm}")
+    print(f"{'='*70}")
     
     # Build contingency table: Languages × Ratings
     llm_data = df[df['Category'] == llm]
@@ -77,3 +95,22 @@ for llm in llms:
         "Cramér's V": cramers_v,
         'Significant': p_value < 0.05
     })
+
+# ============================================================
+# SUMMARY
+# ============================================================
+print("\n" + "="*70)
+print("SUMMARY")
+print("="*70)
+
+results_df = pd.DataFrame(results)
+print(results_df.to_string(index=False))
+
+print("\nConclusion:")
+sig_llms = [r['LLM'] for r in results if r['Significant']]
+if sig_llms:
+    print(f"  LLMs with language-dependent performance: {', '.join(sig_llms)}")
+else:
+    print(f"  All LLMs perform consistently across languages")
+
+print("="*70)
